@@ -9,47 +9,17 @@
 #include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
 #include "Core/Window/Window.hpp"
+#include "Other/CustomTypes/Ref.hpp"
+#include "Renderer/Textures/Texture.hpp"
 
 #include <GLFW/glfw3.h>
 
 namespace Axle {
     FrameBuffer::FrameBuffer(const Ref<Texture2D>& color, bool isDepthNeeded, bool isStencilNeeded)
-        : m_Color(color) {
-        AX_GL_CALL(glCreateFramebuffers(1, &m_ID));
-
-        AX_GL_CALL(glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0, m_Color->GetID(), 0));
-
-        // Attach renderbuffer only if necessary
-        if (isDepthNeeded || isStencilNeeded) {
-            u32 internalFormat;
-            u32 attachmentPoint;
-
-            if (isDepthNeeded && isStencilNeeded) {
-                internalFormat = GL_DEPTH24_STENCIL8;
-                attachmentPoint = GL_DEPTH_STENCIL_ATTACHMENT;
-            } else if (isDepthNeeded) {
-                internalFormat = GL_DEPTH_COMPONENT24;
-                attachmentPoint = GL_DEPTH_ATTACHMENT;
-            } else { // stencil only
-                internalFormat = GL_STENCIL_INDEX8;
-                attachmentPoint = GL_STENCIL_ATTACHMENT;
-            }
-
-            AX_GL_CALL(glCreateRenderbuffers(1, &m_RenderBufferID));
-
-            AX_GL_CALL(glNamedRenderbufferStorage(
-                m_RenderBufferID, internalFormat, m_Color->GetWidth(), m_Color->GetHeight()));
-            AX_GL_CALL(glNamedFramebufferRenderbuffer(m_ID, attachmentPoint, GL_RENDERBUFFER, m_RenderBufferID));
-        }
-
-        glNamedFramebufferDrawBuffer(m_ID, GL_COLOR_ATTACHMENT0);
-
-#ifdef AX_DEBUG
-        // Check errors
-        if (glCheckNamedFramebufferStatus(m_ID, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            AX_PANIC(LogChannel::Renderer, "Render buffer is not complete");
-        }
-#endif // AX_DEBUG
+        : m_Color(color),
+          m_IsDepthEnabled(isDepthNeeded),
+          m_IsStencilEnabled(isStencilNeeded) {
+        Create();
     }
 
     FrameBuffer::~FrameBuffer() {
@@ -103,5 +73,54 @@ namespace Axle {
         if (m_RenderBufferID != 0) {
             AX_GL_CALL(glDeleteRenderbuffers(1, &m_RenderBufferID));
         }
+    }
+
+    void FrameBuffer::Resize(u32 width, u32 height) {
+        if (width == m_Color->GetWidth() && height == m_Color->GetHeight() || width == 0 || height == 0)
+            return;
+
+        TextureFormat internalFormat = m_Color->GetInternalFormat();
+        Reset();
+
+        m_Color = Ref<Texture2D>::Create(width, height, internalFormat);
+        Create();
+    }
+
+    void FrameBuffer::Create() {
+        AX_GL_CALL(glCreateFramebuffers(1, &m_ID));
+
+        AX_GL_CALL(glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0, m_Color->GetID(), 0));
+
+        // Attach renderbuffer only if necessary
+        if (m_IsDepthEnabled || m_IsStencilEnabled) {
+            u32 internalFormat;
+            u32 attachmentPoint;
+
+            if (m_IsDepthEnabled && m_IsStencilEnabled) {
+                internalFormat = GL_DEPTH24_STENCIL8;
+                attachmentPoint = GL_DEPTH_STENCIL_ATTACHMENT;
+            } else if (m_IsDepthEnabled) {
+                internalFormat = GL_DEPTH_COMPONENT24;
+                attachmentPoint = GL_DEPTH_ATTACHMENT;
+            } else { // stencil only
+                internalFormat = GL_STENCIL_INDEX8;
+                attachmentPoint = GL_STENCIL_ATTACHMENT;
+            }
+
+            AX_GL_CALL(glCreateRenderbuffers(1, &m_RenderBufferID));
+
+            AX_GL_CALL(glNamedRenderbufferStorage(
+                m_RenderBufferID, internalFormat, m_Color->GetWidth(), m_Color->GetHeight()));
+            AX_GL_CALL(glNamedFramebufferRenderbuffer(m_ID, attachmentPoint, GL_RENDERBUFFER, m_RenderBufferID));
+        }
+
+        glNamedFramebufferDrawBuffer(m_ID, GL_COLOR_ATTACHMENT0);
+
+#ifdef AX_DEBUG
+        // Check errors
+        if (glCheckNamedFramebufferStatus(m_ID, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            AX_PANIC(LogChannel::Renderer, "Render buffer is not complete");
+        }
+#endif // AX_DEBUG
     }
 } // namespace Axle

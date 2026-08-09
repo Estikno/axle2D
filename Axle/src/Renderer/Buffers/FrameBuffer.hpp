@@ -35,6 +35,8 @@ namespace Axle {
         FrameBuffer(const FrameBuffer&) = delete;
         FrameBuffer& operator=(const FrameBuffer&) = delete;
 
+        void Resize(u32 width, u32 height);
+
         inline u32 GetID() const {
             return m_ID;
         }
@@ -60,8 +62,10 @@ namespace Axle {
 
     private:
         void Reset();
+        void Create();
 
         u32 m_ID = 0, m_RenderBufferID = 0;
+        bool m_IsDepthEnabled = false, m_IsStencilEnabled = false;
 
         Ref<Texture2D> m_Color;
     };

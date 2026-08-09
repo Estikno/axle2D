@@ -37,7 +37,6 @@ namespace Axle {
         void OnAttachRender() override {
             // Shaders
             shader = Shader::Create("Sandbox/src/Shaders/default.bin");
-
             // Model
             model = Model("assets/tests/backpack/backpack.obj");
 
@@ -76,25 +75,7 @@ namespace Axle {
         }
 
         virtual void OnImGuiRender(f64 deltaTime) override {
-            if (updateCamera.load(std::memory_order_acquire))
-                return;
-
-            Camera& cam = Application::GetInstance().GetCamera();
-            ImGuizmo::BeginFrame();
-
-
-            ImVec2 viewportPos = ImGui::GetWindowPos();
-            ImVec2 viewportSize = ImGui::GetWindowSize();
-            ImGuizmo::SetRect(viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
-
-            ImGuizmo::OPERATION op = ImGuizmo::TRANSLATE; // or ROTATE, SCALE
-            ImGuizmo::MODE mode = ImGuizmo::LOCAL;        // or WORLD
-
-            ImGuizmo::Manipulate(glm::value_ptr(cam.GetViewMatrix()),
-                                 glm::value_ptr(cam.GetProjectionMatrix()),
-                                 op,
-                                 mode,
-                                 glm::value_ptr(transform));
+            ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         }
 
         bool OnFrameBufferResize(FrameBufferResizeEvent& event) {
@@ -136,6 +117,12 @@ namespace Axle {
             PushLayer(new EditorLayer());
         }
         ~Editor() {}
+
+        static Editor& Get() {
+            return static_cast<Editor&>(Application::GetInstance());
+        }
+
+    private:
     };
 
     Application* CreateApplication() {

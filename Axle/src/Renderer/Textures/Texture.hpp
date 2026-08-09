@@ -68,6 +68,7 @@ namespace Axle {
         virtual u32 GetHeight() const = 0;
         virtual TextureType GetType() const = 0;
         virtual u32 GetID() const = 0;
+        virtual TextureFormat GetInternalFormat() const = 0;
 
         virtual void Bind(u32 textureUnit) const = 0;
     };
@@ -148,6 +149,10 @@ namespace Axle {
             return m_ID;
         }
 
+        inline virtual TextureFormat GetInternalFormat() const override {
+            return m_InternalFormat;
+        }
+
         virtual void Bind(u32 textureUnit) const override;
 
     private:
@@ -160,6 +165,7 @@ namespace Axle {
         u32 m_Width = 0, m_Height = 0;
         ResourceManager::ManagedFileHandle m_Handle;
 
+        TextureFormat m_InternalFormat = TextureFormat::RGB8;
         TextureType m_Type = TextureType::Unknown;
     };
 
@@ -214,6 +220,10 @@ namespace Axle {
             return m_ID;
         }
 
+        inline virtual TextureFormat GetInternalFormat() const override {
+            return m_InternalFormat;
+        }
+
         virtual void Bind(u32 textureUnit) const override;
 
     private:
@@ -226,6 +236,7 @@ namespace Axle {
         u32 m_Width = 0, m_Height = 0;
         ResourceManager::ManagedFileHandle m_Handle;
 
+        TextureFormat m_InternalFormat = TextureFormat::RGB8;
         TextureType m_Type = TextureType::Unknown;
     };
 } // namespace Axle

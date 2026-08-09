@@ -106,7 +106,8 @@ namespace Axle {
     Texture2D::Texture2D(u32 width, u32 height, TextureFormat internalFormat, i32 mipmaps, TextureType type)
         : m_Width(width),
           m_Height(height),
-          m_Type(type) {
+          m_Type(type),
+          m_InternalFormat(internalFormat) {
         TracyGpuZone("Create texture");
 
         AX_GL_CALL(glCreateTextures(GL_TEXTURE_2D, 1, &m_ID));
@@ -158,12 +159,15 @@ namespace Axle {
         if (nrChannels == 1) {
             internalFormat = GL_RED;
             dataFormat = GL_RED;
+            m_InternalFormat = TextureFormat::R8;
         } else if (nrChannels == 3) {
             internalFormat = GL_RGB8;
             dataFormat = GL_RGB;
+            m_InternalFormat = TextureFormat::RGB8;
         } else if (nrChannels == 4) {
             internalFormat = GL_RGBA8;
             dataFormat = GL_RGBA;
+            m_InternalFormat = TextureFormat::RGBA8;
         } else {
             AX_PANIC(LogChannel::Renderer, "Image format not supported");
         }
@@ -283,12 +287,15 @@ namespace Axle {
         if (nrChannels == 1) {
             internalFormat = GL_RED;
             dataFormat = GL_RED;
+            m_InternalFormat = TextureFormat::R8;
         } else if (nrChannels == 3) {
             internalFormat = GL_RGB8;
             dataFormat = GL_RGB;
+            m_InternalFormat = TextureFormat::RGB8;
         } else if (nrChannels == 4) {
             internalFormat = GL_RGBA8;
             dataFormat = GL_RGBA;
+            m_InternalFormat = TextureFormat::RGBA8;
         } else {
             AX_PANIC(LogChannel::Renderer, "Image format not supported");
         }
