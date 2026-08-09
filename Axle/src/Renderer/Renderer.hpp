@@ -2,13 +2,13 @@
 
 #include "axpch.hpp"
 
-#include "Renderer/Primitives/VertexArray.hpp"
+#include "Renderer/Buffers/VertexArray.hpp"
 #include "Renderer/Camera/Camera.hpp"
 #include "Renderer/Shaders/Shader.hpp"
-#include "Renderer/Primitives/FrameBuffer.hpp"
+#include "Renderer/Buffers/FrameBuffer.hpp"
 #include "Renderer/Skybox/Skybox.hpp"
 #include "Renderer/Textures/Texture.hpp"
-#include "Renderer/Primitives/UniformBuffer.hpp"
+#include "Renderer/Buffers/UniformBuffer.hpp"
 
 #include "glm/fwd.hpp"
 

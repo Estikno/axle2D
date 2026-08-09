@@ -7,8 +7,8 @@
 #include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
 #include "Renderer/Textures/Texture.hpp"
-#include "Renderer/Primitives/VertexArray.hpp"
-#include "Renderer/Primitives/Buffer.hpp"
+#include "Renderer/Buffers/VertexArray.hpp"
+#include "Renderer/Buffers/Buffer.hpp"
 #include "Renderer/Renderer.hpp"
 #include "Renderer/Shaders/Shader.hpp"
 

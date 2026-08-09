@@ -5,7 +5,7 @@
 #include "Skybox.hpp"
 #include "Renderer/Shaders/Shader.hpp"
 #include "Renderer/GLDebug.hpp"
-#include "Renderer/Primitives/VertexArray.hpp"
+#include "Renderer/Buffers/VertexArray.hpp"
 #include "Renderer/Textures/Texture.hpp"
 #include "Renderer/Renderer.hpp"
 

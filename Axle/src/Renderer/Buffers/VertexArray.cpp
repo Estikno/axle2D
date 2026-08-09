@@ -4,7 +4,7 @@
 
 #include "VertexArray.hpp"
 #include "Renderer/GLDebug.hpp"
-#include "Renderer/Primitives/Buffer.hpp"
+#include "Renderer/Buffers/Buffer.hpp"
 #include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
 #include "Renderer/Shaders/Shader.hpp"

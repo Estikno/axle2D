@@ -2,7 +2,7 @@
 
 #include "axpch.hpp"
 
-#include "Primitives/VertexArray.hpp"
+#include "Buffers/VertexArray.hpp"
 
 #include <glm/glm.hpp>
 

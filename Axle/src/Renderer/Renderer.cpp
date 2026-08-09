@@ -1,16 +1,14 @@
 #include "axpch.hpp"
 
-#include <glad/gl.h>
-
 #include "Renderer.hpp"
 #include "RenderCommand.hpp"
 
 #include "Renderer/Camera/Camera.hpp"
 #include "Renderer/Shaders/ShaderManager.hpp"
 #include "Renderer/Textures/TextureManager.hpp"
-#include "Renderer/Primitives/FrameBuffer.hpp"
-#include "Renderer/Primitives/VertexArray.hpp"
-#include "Renderer/Primitives/UniformBuffer.hpp"
+#include "Renderer/Buffers/FrameBuffer.hpp"
+#include "Renderer/Buffers/VertexArray.hpp"
+#include "Renderer/Buffers/UniformBuffer.hpp"
 #include "Renderer/Skybox/Skybox.hpp"
 #include "Renderer/Shaders/Shader.hpp"
 #include "Other/CustomTypes/Ref.hpp"

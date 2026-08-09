@@ -3,7 +3,7 @@
 #include "axpch.hpp"
 
 #include "Core/Types.hpp"
-#include "Renderer/Primitives/Buffer.hpp"
+#include "Renderer/Buffers/Buffer.hpp"
 #include "Other/CustomTypes/Ref.hpp"
 
 namespace Axle {

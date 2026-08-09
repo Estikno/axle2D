@@ -3,7 +3,7 @@
 #include "axpch.hpp"
 
 #include "Core/Types.hpp"
-#include "Renderer/Primitives/VertexArray.hpp"
+#include "Renderer/Buffers/VertexArray.hpp"
 #include "Renderer/Shaders/Shader.hpp"
 #include "Other/CustomTypes/Ref.hpp"
 #include "Renderer/Textures/Texture.hpp"
