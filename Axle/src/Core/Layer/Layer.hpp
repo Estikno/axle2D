@@ -60,6 +60,8 @@ namespace Axle {
          * */
         virtual void OnRender(f64 deltaTime) = 0;
 
+        virtual void OnImGuiRender(f64 deltaTime) {}
+
         /**
          * Called when the layer is dettached from the stack, but in the render thread.
          * All OpenGL calls must be done here.

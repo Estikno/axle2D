@@ -31,3 +31,6 @@
 [submodule "Axle/vendor/tracy"]
 	path = Axle/vendor/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "Editor/vendor/ImGuizmo"]
+	path = Editor/vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

@@ -231,10 +231,19 @@ namespace Axle {
             AX_SCHEDULE_TAG_AND_WAIT(EVENT_INPUT_TAG);
 
             if (!app->m_Minimized.load(std::memory_order_acquire)) {
+                ImGuiInitFrame();
+
                 for (Layer* layer : *(app->m_LayerStack)) {
                     ZoneScopedN("Layer OnRender");
                     layer->OnRender(elapsed);
                 }
+
+                for (Layer* layer : *(app->m_LayerStack)) {
+                    ZoneScopedN("Layer OnRender");
+                    layer->OnImGuiRender(elapsed);
+                }
+
+                ImGuiEndFrame();
             }
 
             {

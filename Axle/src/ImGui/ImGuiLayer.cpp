@@ -16,6 +16,19 @@
 #include "Debug/Inspector.hpp"
 
 namespace Axle {
+    void ImGuiInitFrame() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+    }
+
+    void ImGuiEndFrame() {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
     ImGuiLayer::ImGuiLayer()
         : Layer("ImGui"),
           m_FPSCounter(0.5f) {
@@ -57,12 +70,6 @@ namespace Axle {
     void ImGuiLayer::OnRender(f64 deltaTime) {
         m_FPSCounter.Tick(static_cast<f32>(deltaTime));
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-
         // Inspector
         if (m_OpenInspector)
             Debug::Inspector::Draw("Inspector", &m_OpenInspector);
@@ -73,9 +80,6 @@ namespace Axle {
         // Debug Information
         if (m_OpenOverlay)
             Debug::ShowSimpleOverlay(&m_OpenOverlay, deltaTime, m_FPSCounter);
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     void ImGuiLayer::OnDettachRender() {
@@ -88,9 +92,6 @@ namespace Axle {
 
         Debug::Inspector::Shutdown();
     }
-
-    void ImGuiLayer::InitFrame() {}
-    void ImGuiLayer::EndFrame() {}
 
     void ImGuiLayer::OnEvent(Event& event) {
         EventDispatcher dispatcher(event);

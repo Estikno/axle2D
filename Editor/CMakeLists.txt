@@ -2,6 +2,27 @@
 #  Editor/CMakeLists.txt
 # ══════════════════════════════════════════════════════════════════════════════
 
+set(VENDOR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
+
+set(INC_IMGUIZMO           "${VENDOR}/ImGuizmo/src")
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ImGuizmo (C++ ImGui static lib)
+# ══════════════════════════════════════════════════════════════════════════════
+add_library(ImGuizmo STATIC
+    "${VENDOR}/ImGuizmo/src/ImGuizmo.cpp"
+    "${VENDOR}/ImGuizmo/src/ImGuizmo.h"
+)
+target_include_directories(ImGuizmo PUBLIC "${INC_IMGUIZMO}")
+target_link_libraries(ImGuizmo PUBLIC ImGui)   # propagates INC_IMGUI too
+
+if(UNIX)
+    set_target_properties(ImGuizmo PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Editor (C++20 Executable)
+# ══════════════════════════════════════════════════════════════════════════════
 file(GLOB_RECURSE EDITOR_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/**.hpp"
@@ -30,7 +51,7 @@ elseif(UNIX)
     target_compile_definitions(Editor PRIVATE AX_PLATFORM_LINUX)
 endif()
 
-target_link_libraries(Editor PRIVATE Axle)
+target_link_libraries(Editor PRIVATE Axle ImGui ImGuizmo)
 
 set_target_properties(Editor PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Editor"

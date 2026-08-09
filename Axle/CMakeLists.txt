@@ -150,7 +150,7 @@ set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR}/GLFW" SYSTEM)
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  ImGui  (C++20 static lib)
+#  ImGui  (C++20 shared lib)
 # ══════════════════════════════════════════════════════════════════════════════
 file(GLOB IMGUI_SOURCES
     "${VENDOR}/imgui/*.cpp"
@@ -163,7 +163,7 @@ file(GLOB IMGUI_SOURCES
     "${VENDOR}/imgui/misc/cpp/imgui_stdlib.h"
 )
 
-add_library(ImGui STATIC ${IMGUI_SOURCES})
+add_library(ImGui SHARED ${IMGUI_SOURCES})
 
 target_include_directories(ImGui PUBLIC "${INC_IMGUI}")
 target_link_libraries(ImGui PUBLIC glfw)
@@ -177,14 +177,19 @@ set_target_properties(ImGui PROPERTIES
 )
 
 if(WIN32)
-    # Match Premake's staticruntime "On" for ImGui on Windows
-    set_target_properties(ImGui PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # Shared libs need explicit dllexport on Windows unless you generate a
+    # .def file — ImGui doesn't annotate its own symbols, so on Windows
+    # you'd typically need CMake's WINDOWS_EXPORT_ALL_SYMBOLS as a shortcut:
+    set_target_properties(ImGui PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 if(UNIX)
     set_target_properties(ImGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    target_compile_options(ImGui PRIVATE -fvisibility=hidden)
 endif()
+
+target_compile_options(ImGui PRIVATE
+    -fno-exceptions
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Axle  (C++20 shared lib)
@@ -251,8 +256,8 @@ if(UNIX)
     # Note: glfw manage their own symbols correctly so they
     # sit outside the --whole-archive block.
     target_link_libraries(Axle PRIVATE
-        -Wl,--whole-archive Glad ImGui stb_image -Wl,--no-whole-archive
-        glfw Tracy::TracyClient assimp
+        -Wl,--whole-archive Glad stb_image -Wl,--no-whole-archive
+        glfw ImGui Tracy::TracyClient assimp
     )
 else()
     target_link_libraries(Axle PRIVATE glfw Glad ImGui stb_image Tracy::TracyClient assimp)
@@ -270,29 +275,40 @@ set_target_properties(Axle PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Axle"
 )
 
-# ── Post-build: copy the Axle DLL/SO into Sandbox and Tests output dirs ────────
-set(AXLE_LIB_OUTPUT "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Axle")
-set(SANDBOX_OUTPUT  "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Sandbox")
-set(EDITOR_OUTPUT  "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Editor")
-set(TESTS_OUTPUT    "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Tests")
+# ── Post-build: copy the DLLs/SOs into needed output dirs ─────────────────────
+set(AXLE_LIB_OUTPUT   "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Axle")
+set(IMGUI_LIB_OUTPUT  "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/ImGui")
+set(SANDBOX_OUTPUT    "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Sandbox")
+set(EDITOR_OUTPUT     "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Editor")
+set(TESTS_OUTPUT      "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/Tests")
 # If the engine is needed by the Asset Pipeline unvomment this and the other 2 lines
 # below for copying the shared library
 # set(AAP_OUTPUT     "${OUTPUT_BASE}/$<CONFIG>/${CMAKE_SYSTEM_NAME}-x64/AAP")
+
+add_custom_command(TARGET ImGui POST_BUILD
+    # Ensure destination dirs exist
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${SANDBOX_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TESTS_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${EDITOR_OUTPUT}"
+    # Copy the built shared library file
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImGui>" "${SANDBOX_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImGui>" "${TESTS_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImGui>" "${EDITOR_OUTPUT}"
+    COMMENT "Copying ImGui shared lib to Sandbox, Tests, and Editor output dirs"
+)
 
 add_custom_command(TARGET Axle POST_BUILD
     # Ensure destination dirs exist
     COMMAND ${CMAKE_COMMAND} -E make_directory "${SANDBOX_OUTPUT}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${TESTS_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${EDITOR_OUTPUT}"
     # COMMAND ${CMAKE_COMMAND} -E make_directory "${AAP_OUTPUT}"
     # Copy the built shared library file
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:Axle>"
-        "${SANDBOX_OUTPUT}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:Axle>"
-        "${TESTS_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:Axle>" "${SANDBOX_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:Axle>" "${TESTS_OUTPUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:Axle>" "${EDITOR_OUTPUT}"
     # COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:Axle>" "${AAP_OUTPUT}"
-    COMMENT "Copying Axle shared lib to Sandbox and Tests output dirs"
+    COMMENT "Copying Axle shared lib to Sandbox, Tests, and Editor output dirs"
 )
 
 # ── Config-specific optimisation flags ────────────────────────────────────────
