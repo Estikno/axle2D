@@ -17,6 +17,8 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 
+#include "Windows/SceneEditor.hpp"
+
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -40,42 +42,43 @@ namespace Axle {
             // Model
             model = Model("assets/tests/backpack/backpack.obj");
 
-            InputManager::SetCursorMode(CursorMode::CursorDisabled);
+            // InputManager::SetCursorMode(CursorMode::CursorDisabled);
 
             // Skybox
             skybox = Ref<Skybox>::Create("assets/tests/skybox1.png", "Sandbox/src/Shaders/skybox.bin");
+
+            editor = new SceneEditor();
         }
 
         void OnDettachRender() override {
             shader.Reset();
             model = Model();
             skybox.Reset();
+            delete editor;
         }
 
         void OnRender(f64 deltaTime) override {
+            editor->PreDraw();
+
             Camera& cam = Application::GetInstance().GetCamera();
-            if (updateCamera.load())
-                cam.GetPositioner()->Update(deltaTime);
+            cam.GetPositioner()->Update(deltaTime);
 
-            SceneHandle handle1 = Renderer::BeginScene(cam, nullptr, nullptr);
+            // SceneHandle handle1 = Renderer::BeginScene(cam, nullptr, nullptr);
 
-            Ref<Texture2D> tex = Ref<Texture2D>::Create(width, height, TextureFormat::RGB8, 0);
-            Ref<FrameBuffer> fBuffer = Ref<FrameBuffer>::Create(tex, true, false);
-
+            const Ref<FrameBuffer>& fBuffer = editor->GetFBO();
             SceneHandle handle2 = Renderer::BeginScene(cam, skybox, fBuffer);
-
             model.Draw(shader, transform);
-
             Renderer::EndScene(handle2);
 
-            tex->Bind(0);
-            Renderer::Submit(tex);
-
-            Renderer::EndScene(handle1);
+            // fBuffer->GetTexture()->Bind(0);
+            // Renderer::Submit(fBuffer->GetTexture());
+            //
+            // Renderer::EndScene(handle1);
         }
 
         virtual void OnImGuiRender(f64 deltaTime) override {
-            ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+            ImGuizmo::BeginFrame();
+            editor->ImguiDraw(Application::GetInstance().GetCamera(), transform);
         }
 
         bool OnFrameBufferResize(FrameBufferResizeEvent& event) {
@@ -105,8 +108,10 @@ namespace Axle {
         Model model;
         Ref<Skybox> skybox;
         Ref<Shader> shader;
-        std::atomic_bool updateCamera = true;
+        std::atomic_bool updateCamera = false;
         glm::mat4 transform = glm::mat4(1.0f);
+
+        SceneEditor* editor = nullptr;
 
         f32 width = 1280.0f, height = 720.0f;
     };

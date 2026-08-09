@@ -22,6 +22,13 @@ namespace Axle {
         Create();
     }
 
+    FrameBuffer::FrameBuffer(u32 width, u32 height, bool isDepthNeeded, bool isStencilNeeded)
+        : m_IsDepthEnabled(isDepthNeeded),
+          m_IsStencilEnabled(isStencilNeeded) {
+        m_Color = Ref<Texture2D>::Create(width, height, TextureFormat::RGB8);
+        Create();
+    }
+
     FrameBuffer::~FrameBuffer() {
         Reset();
     }

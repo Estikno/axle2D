@@ -26,6 +26,7 @@ namespace Axle {
          * @param isStencilNeeded Does it need a stencil buffer?
          * */
         FrameBuffer(const Ref<Texture2D>& color, bool isDepthNeeded, bool isStencilNeeded);
+        FrameBuffer(u32 width, u32 height, bool isDepthNeeded, bool isStencilNeeded);
 
         ~FrameBuffer() override;
 
@@ -43,6 +44,10 @@ namespace Axle {
 
         inline u32 GetRenderBufferID() const {
             return m_RenderBufferID;
+        }
+
+        inline const Ref<Texture2D>& GetTexture() const {
+            return m_Color;
         }
 
         /**

@@ -19,7 +19,7 @@ namespace Axle {
     public:
         virtual ~ICameraPositioner() = default;
         virtual glm::mat4 GetViewMatrix() const = 0;
-        virtual glm::mat4 GetProjectionMatrix() const = 0;
+        virtual glm::mat4 GetProjectionMatrix(u32 width = 0, u32 height = 0) const = 0;
         virtual f32 GetFOV() const = 0;
         virtual glm::vec3 GetPosition() const = 0;
         virtual void Update(f32 deltaTime) = 0;
@@ -58,11 +58,11 @@ namespace Axle {
             return m_Positioner.load(std::memory_order_acquire)->GetViewMatrix();
         }
 
-        inline glm::mat4 GetProjectionMatrix() const {
+        inline glm::mat4 GetProjectionMatrix(u32 width = 0, u32 height = 0) const {
             AX_ASSERT(m_Positioner.load(std::memory_order_acquire) != nullptr,
                       LogChannel::Renderer,
                       "Must add a positioner before calling any method.");
-            return m_Positioner.load(std::memory_order_acquire)->GetProjectionMatrix();
+            return m_Positioner.load(std::memory_order_acquire)->GetProjectionMatrix(width, height);
         }
 
         inline glm::vec3 GetPosition() const {
@@ -134,7 +134,7 @@ namespace Axle {
             return glm::lookAt(m_Position, m_Position + m_Forward, m_Up);
         }
 
-        virtual glm::mat4 GetProjectionMatrix() const override;
+        virtual glm::mat4 GetProjectionMatrix(u32 width = 0, u32 height = 0) const override;
 
         inline f32 GetFOV() const override {
             return m_FOV;
@@ -210,7 +210,7 @@ namespace Axle {
             return m_FOV;
         }
 
-        virtual glm::mat4 GetProjectionMatrix() const override;
+        virtual glm::mat4 GetProjectionMatrix(u32 width, u32 height) const override;
 
         f32 p_DampingLinear;
         glm::vec3 p_DampingEulerAngles;

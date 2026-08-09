@@ -73,6 +73,8 @@ namespace Axle {
 
         if (!s_SceneData.empty())
             BindSceneState(s_SceneData.back());
+        else
+            FrameBuffer::BindDefault();
     }
 
     void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform) {

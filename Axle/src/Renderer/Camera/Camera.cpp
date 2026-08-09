@@ -19,9 +19,12 @@
 #include <glm/glm.hpp>
 
 namespace Axle {
-    glm::mat4 CameraPositionerDebug::GetProjectionMatrix() const {
-        const WindowData& data = Application::GetInstance().GetWindow().GetWindowData();
+    glm::mat4 CameraPositionerDebug::GetProjectionMatrix(u32 width, u32 height) const {
+        if (width != 0 && height != 0)
+            return glm::perspective(
+                glm::radians(m_FOV), static_cast<f32>(width) / static_cast<f32>(height), 0.1f, 1000.0f);
 
+        const WindowData& data = Application::GetInstance().GetWindow().GetWindowData();
         if (data.FramebufferWidth == 0 || data.FramebufferHeight == 0)
             return glm::mat4(1.0f);
 
@@ -107,7 +110,11 @@ namespace Axle {
         m_CurrentTransform = glm::translate(glm::yawPitchRoll(a.y, a.x, a.z), -m_PositionCurrent);
     }
 
-    inline glm::mat4 CameraPositionerMoveTo::GetProjectionMatrix() const {
+    inline glm::mat4 CameraPositionerMoveTo::GetProjectionMatrix(u32 width, u32 height) const {
+        if (width != 0 && height != 0)
+            return glm::perspective(
+                glm::radians(m_FOV), static_cast<f32>(width) / static_cast<f32>(height), 0.1f, 1000.0f);
+
         const WindowData& data = Application::GetInstance().GetWindow().GetWindowData();
 
         if (data.FramebufferWidth == 0 || data.FramebufferHeight == 0)
