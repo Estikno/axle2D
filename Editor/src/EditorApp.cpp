@@ -42,8 +42,6 @@ namespace Axle {
             // Model
             model = Model("assets/tests/backpack/backpack.obj");
 
-            // InputManager::SetCursorMode(CursorMode::CursorDisabled);
-
             // Skybox
             skybox = Ref<Skybox>::Create("assets/tests/skybox1.png", "Sandbox/src/Shaders/skybox.bin");
 
@@ -60,8 +58,8 @@ namespace Axle {
         void OnRender(f64 deltaTime) override {
             editor->PreDraw();
 
-            Camera& cam = Application::GetInstance().GetCamera();
-            cam.GetPositioner()->Update(deltaTime);
+            Camera& cam = editor->GetCamera();
+            editor->UpdateCamera(static_cast<f32>(deltaTime));
 
             // SceneHandle handle1 = Renderer::BeginScene(cam, nullptr, nullptr);
 
@@ -78,7 +76,7 @@ namespace Axle {
 
         virtual void OnImGuiRender(f64 deltaTime) override {
             ImGuizmo::BeginFrame();
-            editor->ImguiDraw(Application::GetInstance().GetCamera(), transform);
+            editor->ImguiDraw(transform);
         }
 
         bool OnFrameBufferResize(FrameBufferResizeEvent& event) {

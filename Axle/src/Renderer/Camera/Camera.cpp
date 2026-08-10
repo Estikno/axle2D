@@ -19,16 +19,46 @@
 #include <glm/glm.hpp>
 
 namespace Axle {
+    // ---------------------------------
+    // Camera
+    // ---------------------------------
+
+    Camera& Camera::operator=(Camera&& other) {
+        if (this != &other) {
+            Reset();
+
+            m_Positioner.store(other.ExchangePositioner(), std::memory_order_release);
+            m_DeletePositioner.store(other.m_DeletePositioner.load(std::memory_order_acquire),
+                                     std::memory_order_release);
+        }
+        return *this;
+    }
+
+    void Camera::Reset() {
+        if (!m_DeletePositioner)
+            return;
+
+        ICameraPositioner* old = ExchangePositioner();
+        if (old != nullptr)
+            delete old;
+    }
+
+    // ---------------------------------
+    // Positioner Debug
+    // ---------------------------------
+
     glm::mat4 CameraPositionerDebug::GetProjectionMatrix(u32 width, u32 height) const {
         if (width != 0 && height != 0)
-            return glm::perspective(
-                glm::radians(m_FOV), static_cast<f32>(width) / static_cast<f32>(height), 0.1f, 1000.0f);
+            return glm::perspective(glm::radians(m_FOV.load(std::memory_order_acquire)),
+                                    static_cast<f32>(width) / static_cast<f32>(height),
+                                    0.1f,
+                                    1000.0f);
 
         const WindowData& data = Application::GetInstance().GetWindow().GetWindowData();
         if (data.FramebufferWidth == 0 || data.FramebufferHeight == 0)
             return glm::mat4(1.0f);
 
-        return glm::perspective(glm::radians(m_FOV),
+        return glm::perspective(glm::radians(m_FOV.load(std::memory_order_acquire)),
                                 static_cast<f32>(data.FramebufferWidth) / static_cast<f32>(data.FramebufferHeight),
                                 0.1f,
                                 1000.0f);
@@ -75,12 +105,12 @@ namespace Axle {
     }
 
     void CameraPositionerDebug::ProcessMouseScroll(f32 yOffset) {
-        m_FOV -= yOffset;
+        f32 previous = m_FOV.fetch_sub(yOffset, std::memory_order_acq_rel);
 
-        if (m_FOV < p_MinFOV)
-            m_FOV = p_MinFOV;
-        if (m_FOV > p_MaxFOV)
-            m_FOV = p_MaxFOV;
+        if (previous < p_MinFOV)
+            m_FOV.store(p_MinFOV, std::memory_order_release);
+        if (previous > p_MaxFOV)
+            m_FOV.store(p_MaxFOV, std::memory_order_release);
     }
 
     void CameraPositionerDebug::UpdateCameraVectors() {
@@ -93,6 +123,10 @@ namespace Axle {
         m_Right = glm::normalize(m_Orientation * glm::vec3(1.0f, 0.0f, 0.0f));
         m_Up = glm::normalize(m_Orientation * glm::vec3(0.0f, 1.0f, 0.0f));
     }
+
+    // ---------------------------------
+    // Positioner Move To
+    // ---------------------------------
 
     void CameraPositionerMoveTo::Update(f32 deltaTime) {
         // Update position
@@ -125,5 +159,4 @@ namespace Axle {
                                 0.1f,
                                 1000.0f);
     }
-
 } // namespace Axle
