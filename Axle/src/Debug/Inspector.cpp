@@ -74,8 +74,6 @@ namespace Axle::Debug {
 
                 if (selectedIndex == 0)
                     old = Application::GetInstance().GetCamera().ExchangePositioner(new CameraPositionerDebug());
-                else if (selectedIndex == 1)
-                    old = Application::GetInstance().GetCamera().ExchangePositioner(new CameraPositionerMoveTo());
 
                 if (old != nullptr)
                     delete old;

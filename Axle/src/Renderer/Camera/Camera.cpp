@@ -124,39 +124,17 @@ namespace Axle {
         m_Up = glm::normalize(m_Orientation * glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
-    // ---------------------------------
-    // Positioner Move To
-    // ---------------------------------
+    void CameraPositionerDebug::SetViewMatrix(const glm::mat4& view) {
+        // camera-to-world pose
+        glm::mat4 inv = glm::inverse(view);
 
-    void CameraPositionerMoveTo::Update(f32 deltaTime) {
-        // Update position
-        m_PositionCurrent += p_DampingLinear * deltaTime * (m_PositionDesired - m_PositionCurrent);
+        m_Position = glm::vec3(inv[3]);
+        glm::vec3 forward = glm::normalize(-glm::vec3(inv[2]));
 
-        // Normalize angles
-        m_AnglesCurrent = ClipAngles(m_AnglesCurrent);
-        m_AnglesDesired = ClipAngles(m_AnglesDesired);
+        // Inverse of the yaw/pitch → forward formula used by UpdateCameraVectors()
+        m_Pitch = glm::degrees(glm::asin(glm::clamp(forward.y, -1.0f, 1.0f)));
+        m_Yaw = glm::degrees(glm::atan(forward.z, forward.x));
 
-        // Update angles
-        m_AnglesCurrent -= AngleDelta(m_AnglesCurrent, m_AnglesDesired) * p_DampingEulerAngles * deltaTime;
-        m_AnglesCurrent = ClipAngles(m_AnglesCurrent);
-
-        const glm::vec3 a = glm::radians(m_AnglesCurrent);
-        m_CurrentTransform = glm::translate(glm::yawPitchRoll(a.y, a.x, a.z), -m_PositionCurrent);
-    }
-
-    inline glm::mat4 CameraPositionerMoveTo::GetProjectionMatrix(u32 width, u32 height) const {
-        if (width != 0 && height != 0)
-            return glm::perspective(
-                glm::radians(m_FOV), static_cast<f32>(width) / static_cast<f32>(height), 0.1f, 1000.0f);
-
-        const WindowData& data = Application::GetInstance().GetWindow().GetWindowData();
-
-        if (data.FramebufferWidth == 0 || data.FramebufferHeight == 0)
-            return glm::mat4(1.0f);
-
-        return glm::perspective(glm::radians(m_FOV),
-                                static_cast<f32>(data.FramebufferWidth) / static_cast<f32>(data.FramebufferHeight),
-                                0.1f,
-                                1000.0f);
+        UpdateCameraVectors();
     }
 } // namespace Axle

@@ -18,7 +18,7 @@ namespace Axle {
             m_FBO->Resize(m_PendingWidth, m_PendingHeight);
         }
         void UpdateCamera(f32 deltatime);
-        void ImguiDraw(glm::mat4& transformSelected);
+        void ImguiDraw(f32 deltatime, glm::mat4& transformSelected);
 
         inline const Ref<FrameBuffer>& GetFBO() const {
             return m_FBO;
@@ -32,7 +32,7 @@ namespace Axle {
         Ref<FrameBuffer> m_FBO;
         Camera m_Camera;
 
-        bool m_Open = true, m_WindowHovered = false;
+        bool m_WindowHovered = false;
         bool m_UpdateCamera = false;
         u32 m_PendingWidth = 900, m_PendingHeight = 600;
         bool m_GizmoActive = false;

@@ -17,7 +17,7 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 
-#include "Windows/SceneEditor.hpp"
+#include "SceneEditor/SceneEditor.hpp"
 
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -76,7 +76,7 @@ namespace Axle {
 
         virtual void OnImGuiRender(f64 deltaTime) override {
             ImGuizmo::BeginFrame();
-            editor->ImguiDraw(transform);
+            editor->ImguiDraw(deltaTime, transform);
         }
 
         bool OnFrameBufferResize(FrameBufferResizeEvent& event) {
@@ -85,28 +85,15 @@ namespace Axle {
             return false;
         }
 
-        bool OnKeyPressedEvent(KeyPressedEvent& event) {
-            if (event.GetKey() == Keys::F4) {
-                bool previous = updateCamera.load();
-                updateCamera.store(!previous);
-
-                InputManager::SetCursorMode((!previous ? CursorMode::CursorDisabled : CursorMode::CursorNormal));
-            }
-
-            return false;
-        }
-
         void OnEvent(Event& event) override {
             EventDispatcher dispatcher(event);
             dispatcher.Dispatch<FrameBufferResizeEvent>(AX_BIND_EVENT_FN(OnFrameBufferResize));
-            dispatcher.Dispatch<KeyPressedEvent>(AX_BIND_EVENT_FN(OnKeyPressedEvent));
         }
 
     private:
         Model model;
         Ref<Skybox> skybox;
         Ref<Shader> shader;
-        std::atomic_bool updateCamera = false;
         glm::mat4 transform = glm::mat4(1.0f);
 
         SceneEditor* editor = nullptr;

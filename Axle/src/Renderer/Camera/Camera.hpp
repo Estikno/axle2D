@@ -43,6 +43,8 @@ namespace Axle {
          * @param deltaTime Time between frames
          * */
         virtual void Update(f32 deltaTime) = 0;
+
+        virtual void SetViewMatrix(const glm::mat4& view) = 0;
     };
 
     /**
@@ -121,6 +123,13 @@ namespace Axle {
                       LogChannel::Renderer,
                       "Must add a positioner before calling any method.");
             return m_Positioner.load(std::memory_order_acquire)->GetPosition();
+        }
+
+        inline void SetViewMatrix(const glm::mat4& view) {
+            AX_ASSERT(m_Positioner.load(std::memory_order_acquire) != nullptr,
+                      LogChannel::Renderer,
+                      "Must add a positioner before calling any method.");
+            m_Positioner.load(std::memory_order_acquire)->SetViewMatrix(view);
         }
 
         /**
@@ -245,6 +254,9 @@ namespace Axle {
             return glm::lookAt(m_Position, m_Position + m_Forward, m_Up);
         }
 
+        // TODO: Fix some issues with the view cube
+        virtual void SetViewMatrix(const glm::mat4& view) override;
+
         virtual glm::mat4 GetProjectionMatrix(u32 width = 0, u32 height = 0) const override;
 
         inline f32 GetFOV() const override {
@@ -278,91 +290,5 @@ namespace Axle {
 
         f32 m_Yaw, m_Pitch;
         std::atomic<f32> m_FOV;
-    };
-
-    class AXLE_API CameraPositionerMoveTo final : public ICameraPositioner {
-    public:
-        CameraPositionerMoveTo()
-            : CameraPositionerMoveTo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)) {}
-
-        CameraPositionerMoveTo(const glm::vec3& pos, const glm::vec3& angles)
-            : m_PositionCurrent(pos),
-              m_PositionDesired(pos),
-              m_AnglesCurrent(angles),
-              m_AnglesDesired(angles) {}
-
-        virtual void Update(f32 deltaTime) override;
-
-        inline void SetPosition(const glm::vec3& pos) {
-            m_PositionCurrent = pos;
-        }
-        inline void SetAngles(f32 pitch, f32 yaw, f32 roll) {
-            m_AnglesCurrent = glm::vec3(pitch, yaw, roll);
-        }
-        inline void SetAngles(const glm::vec3& angles) {
-            m_AnglesCurrent = angles;
-        }
-        inline void SetDesiredPosition(const glm::vec3& pos) {
-            m_PositionDesired = pos;
-        }
-        inline void SetDesiredAngles(f32 pitch, f32 yaw, f32 roll) {
-            m_AnglesDesired = glm::vec3(pitch, yaw, roll);
-        }
-        inline void SetDesiredAngles(const glm::vec3& angles) {
-            m_AnglesDesired = angles;
-        }
-
-        inline virtual glm::vec3 GetPosition() const override {
-            return m_PositionCurrent;
-        }
-        inline virtual glm::mat4 GetViewMatrix() const override {
-            return m_CurrentTransform;
-        }
-        inline virtual f32 GetFOV() const override {
-            return m_FOV;
-        }
-
-        virtual glm::mat4 GetProjectionMatrix(u32 width, u32 height) const override;
-
-        f32 p_DampingLinear;
-        glm::vec3 p_DampingEulerAngles;
-
-    private:
-        inline static constexpr const char* ConfigSection = "MoveToCamera";
-
-        inline void InitPublicVariables() {
-            p_DampingLinear = Config::GetOrSet<f32>(std::string(ConfigSection), "LinearDamping", 10.0f);
-            p_DampingEulerAngles.x = Config::GetOrSet<f32>(std::string(ConfigSection), "DampingX", 5.0f);
-            p_DampingEulerAngles.y = Config::GetOrSet<f32>(std::string(ConfigSection), "DampingY", 5.0f);
-            p_DampingEulerAngles.z = Config::GetOrSet<f32>(std::string(ConfigSection), "DampingZ", 5.0f);
-        }
-
-        inline static f32 ClipAngle(f32 a) {
-            if (a < -180.0f)
-                return a + 360.0f;
-            if (a > 180.0f)
-                return a - 360.0f;
-            return a;
-        }
-
-        inline static glm::vec3 ClipAngles(const glm::vec3& angles) {
-            return glm::vec3(std::fmod(angles.x, 360.0f), std::fmod(angles.y, 360.0f), std::fmod(angles.z, 360.0f));
-        }
-
-        inline static glm::vec3 AngleDelta(const glm::vec3& current, const glm::vec3& desired) {
-            const glm::vec3 d = ClipAngles(current) - ClipAngles(desired);
-            return glm::vec3(ClipAngle(d.x), ClipAngle(d.y), ClipAngle(d.z));
-        }
-
-        glm::vec3 m_PositionCurrent = glm::vec3(0.0f);
-        glm::vec3 m_PositionDesired = glm::vec3(0.0f);
-
-        // pitch, yaw, roll
-        glm::vec3 m_AnglesCurrent = glm::vec3(0.0f);
-        glm::vec3 m_AnglesDesired = glm::vec3(0.0f);
-
-        glm::mat4 m_CurrentTransform = glm::mat4(0.0f);
-
-        f32 m_FOV = 45.0f;
     };
 } // namespace Axle
