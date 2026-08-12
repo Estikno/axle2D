@@ -212,8 +212,12 @@ namespace Axle {
         }
 
         void Reset(T* instance = nullptr) {
+            if (m_Instance == instance)
+                return;
+
             DecRef();
             m_Instance = instance;
+            IncRef();
         }
 
         template <typename U>
