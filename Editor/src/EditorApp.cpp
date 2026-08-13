@@ -18,6 +18,7 @@
 #include "ImGuizmo.h"
 
 #include "SceneEditor/SceneEditor.hpp"
+#include "SceneEditor/Grid.hpp"
 
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -46,6 +47,7 @@ namespace Axle {
             skybox = Ref<Skybox>::Create("assets/tests/skybox1.png", "Sandbox/src/Shaders/skybox.bin");
 
             editor = new SceneEditor();
+            grid = new Grid();
         }
 
         void OnDettachRender() override {
@@ -53,6 +55,7 @@ namespace Axle {
             model = Model();
             skybox.Reset();
             delete editor;
+            delete grid;
         }
 
         void OnRender(f64 deltaTime) override {
@@ -65,7 +68,10 @@ namespace Axle {
 
             const Ref<FrameBuffer>& fBuffer = editor->GetFBO();
             SceneHandle handle2 = Renderer::BeginScene(cam, skybox, fBuffer);
+
             model.Draw(shader, transform);
+            grid->Draw();
+
             Renderer::EndScene(handle2);
 
             // fBuffer->GetTexture()->Bind(0);
@@ -97,6 +103,7 @@ namespace Axle {
         glm::mat4 transform = glm::mat4(1.0f);
 
         SceneEditor* editor = nullptr;
+        Grid* grid = nullptr;
 
         f32 width = 1280.0f, height = 720.0f;
     };

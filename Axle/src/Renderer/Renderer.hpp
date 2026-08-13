@@ -79,17 +79,18 @@ namespace Axle {
             glm::mat4 ViewProjectionMatrix;
             glm::vec3 CameraPosition;
 
+            f32 _Pad0; // matches std140's implicit padding after a vec3
+
+            glm::vec2 ViewportSize;
+
             // Frame info
             // TODO: Find a better way of sending the time variable as this gets less presition with the more time it
             // passes. We may only send time in determined cases.
             f64 Time;
 
-            ScenePOD(const SceneData& data)
-                : ViewMatrix(data.ViewMatrix),
-                  ProjectionMatrix(data.ProjectionMatrix),
-                  ViewProjectionMatrix(data.ViewProjectionMatrix),
-                  CameraPosition(data.CameraPosition) {}
+            ScenePOD(const SceneData& data);
         };
+        static_assert(offsetof(ScenePOD, ViewportSize) == 208);
 
         static std::vector<SceneData> s_SceneData;
 

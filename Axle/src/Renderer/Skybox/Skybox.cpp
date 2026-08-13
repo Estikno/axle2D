@@ -51,9 +51,11 @@ namespace Axle {
 
         m_CubemapTexture->Bind(0);
 
+        AX_GL_CALL(glDepthFunc(GL_LEQUAL));
         AX_GL_CALL(glDepthMask(GL_FALSE));
         Renderer::Submit(m_Shader, m_VAO);
         AX_GL_CALL(glDepthMask(GL_TRUE));
+        AX_GL_CALL(glDepthFunc(GL_LESS));
     }
 
     void Skybox::Reset() {

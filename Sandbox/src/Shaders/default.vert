@@ -15,6 +15,8 @@ layout (std140, binding = 0) uniform Scene {
     mat4 u_ViewProjectionMatrix;
     vec3 u_CameraPosition;
 
+    vec2 u_ViewportSize;
+
     // Frame info
     double u_Time;
 };

@@ -23,4 +23,8 @@ namespace Axle {
     void RenderCommand::SetViewport(u32 x, u32 y, u32 width, u32 height) {
         AX_GL_CALL(glViewport(x, y, width, height));
     }
+
+    void RenderCommand::SetDephtMaskStatus(bool enable) {
+        AX_GL_CALL(glDepthMask(enable ? GL_TRUE : GL_FALSE));
+    }
 } // namespace Axle

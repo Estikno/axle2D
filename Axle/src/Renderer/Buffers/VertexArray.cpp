@@ -24,19 +24,7 @@ namespace Axle {
     Ref<VertexArray> VertexArray::ScreenQuad() {
         // Quad information
         static constexpr std::array<f32, 12> vertices = {
-            -1.0f,
-            1.0f,
-            0.999f,
-            -1.0f,
-            -1.0f,
-            0.999f,
-            1.0f,
-            -1.0f,
-            0.999f,
-            1.0f,
-            1.0f,
-            0.999f,
-        };
+            -1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f};
         static constexpr std::array<u32, 6> indices = {0, 1, 2, 0, 2, 3};
         static const BufferLayout layout = {{ShaderDataType::Vec3, "aPos"}};
 

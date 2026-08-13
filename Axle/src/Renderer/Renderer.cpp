@@ -14,6 +14,7 @@
 #include "Other/CustomTypes/Ref.hpp"
 #include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
+#include "Core/Application.hpp"
 
 namespace Axle {
     std::vector<SceneData> Renderer::s_SceneData;
@@ -114,5 +115,19 @@ namespace Axle {
             data.RenderTarget->Bind();
         else
             FrameBuffer::BindDefault();
+    }
+
+    Renderer::ScenePOD::ScenePOD(const SceneData& data)
+        : ViewMatrix(data.ViewMatrix),
+          ProjectionMatrix(data.ProjectionMatrix),
+          ViewProjectionMatrix(data.ViewProjectionMatrix),
+          CameraPosition(data.CameraPosition) {
+        if (data.RenderTarget) {
+            ViewportSize = glm::vec2((f32) data.RenderTarget->GetTexture()->GetWidth(),
+                                     (f32) data.RenderTarget->GetTexture()->GetHeight());
+        } else {
+            const WindowData& windowData = Application::GetInstance().GetWindow().GetWindowData();
+            ViewportSize = glm::vec2((f32) windowData.FramebufferWidth, (f32) windowData.FramebufferHeight);
+        }
     }
 } // namespace Axle

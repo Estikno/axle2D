@@ -263,6 +263,11 @@ namespace Axle {
         AX_GL_CALL(glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value)));
     }
 
+    void Shader::SetVec4Uniform(const std::string& name, const glm::vec4& value) const {
+        TracyGpuZone("Set vec4 uniform program");
+        AX_GL_CALL(glUniform4fv(glGetUniformLocation(m_ID, name.c_str()), 1, glm::value_ptr(value)));
+    }
+
     Ref<Shader> Shader::Create(const std::string& filename, bool checkCached) {
         return Create(filename, filename, checkCached);
     }

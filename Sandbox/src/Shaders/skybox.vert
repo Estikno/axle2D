@@ -11,6 +11,8 @@ layout (std140, binding = 0) uniform Scene {
     mat4 u_ViewProjectionMatrix;
     vec3 u_CameraPosition;
 
+    vec2 u_ViewportSize;
+
     // Frame info
     double u_Time;
 };
@@ -18,5 +20,5 @@ layout (std140, binding = 0) uniform Scene {
 void main(){
     vec4 pos = inverse(u_ViewProjectionMatrix) * vec4(aPos.xy, 1.0, 1.0);
     TexCoords = pos.xyz / pos.w;
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = vec4(aPos.xy, 1.0, 1.0);
 }

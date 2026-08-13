@@ -93,6 +93,7 @@ namespace Axle {
         void SetIntUniform(const std::string& name, i32 value) const;
         void SetFloatUniform(const std::string& name, f32 value) const;
         void SetMat4Uniform(const std::string& name, const glm::mat4& value) const;
+        void SetVec4Uniform(const std::string& name, const glm::vec4& value) const;
 
     private:
         /**
