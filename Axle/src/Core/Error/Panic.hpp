@@ -70,8 +70,8 @@ namespace Axle {
         }                          \
     } while (0)
 
-// Debug asserts, only active in testing mode
-#ifdef AXLE_TESTING
+// Debug asserts, only active in debug mode
+#ifdef AX_DEBUG
 #    define AX_ASSERT(condition, ...)  \
         do {                           \
             if (!(condition)) {        \
@@ -80,4 +80,4 @@ namespace Axle {
         } while (0)
 #else
 #    define AX_ASSERT(condition, ...) ((void) 0)
-#endif // AXLE_TESTING
+#endif // AXLE_DEBUG

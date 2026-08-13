@@ -119,7 +119,6 @@ namespace Axle {
                                                                              TextureType type,
                                                                              const std::string& directory) {
         ZoneScopedN("Load material textures");
-
         std::vector<Ref<Texture2D>> textures;
 
         for (u32 i = 0; i < mat->GetTextureCount(aiType); ++i) {

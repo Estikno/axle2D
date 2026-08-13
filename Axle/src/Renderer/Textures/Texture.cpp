@@ -12,11 +12,52 @@
 #include "Renderer/Textures/TextureManager.hpp"
 
 #include <stb_image.h>
+#include <assimp/material.h>
 
 #include <tracy/Tracy.hpp>
 #include <tracy/TracyOpenGL.hpp>
 
 namespace Axle {
+    TextureType TextureAssimpTypeToTextureType(u32 assimpType) {
+        aiTextureType aType = static_cast<aiTextureType>(assimpType);
+
+        switch (aType) {
+            case aiTextureType_DIFFUSE:
+                return TextureType::BaseColor;
+            case aiTextureType_BASE_COLOR:
+                return TextureType::BaseColor;
+            case aiTextureType_NORMALS:
+                return TextureType::Normal;
+            case aiTextureType_NORMAL_CAMERA:
+                return TextureType::Normal;
+            case aiTextureType_METALNESS:
+                return TextureType::MetallicRoughness;
+                // FIX: Pack Metalness into B channel if separate (eventually this will be done on AAP)
+            case aiTextureType_DIFFUSE_ROUGHNESS:
+                return TextureType::MetallicRoughness;
+                // FIX: Pack Metalness into G channel if separate (eventually this will be done on AAP)
+            case aiTextureType_GLTF_METALLIC_ROUGHNESS:
+                return TextureType::MetallicRoughness;
+            case aiTextureType_AMBIENT_OCCLUSION:
+                return TextureType::AO;
+            case aiTextureType_LIGHTMAP:
+                return TextureType::AO;
+            case aiTextureType_EMISSIVE:
+                return TextureType::Emissive;
+            case aiTextureType_EMISSION_COLOR:
+                return TextureType::Emissive;
+            case aiTextureType_HEIGHT:
+                return TextureType::Height;
+            case aiTextureType_DISPLACEMENT:
+                return TextureType::Height;
+            case aiTextureType_OPACITY:
+                return TextureType::Opacity;
+        }
+
+        AX_ASSERT(false, LogChannel::Renderer, "Texture type not supported");
+        return TextureType::Unknown;
+    }
+
     u32 TextureWrapModeToOpenGL(TextureWrapMode mode) {
         switch (mode) {
             case TextureWrapMode::Repeat:

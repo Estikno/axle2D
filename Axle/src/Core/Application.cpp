@@ -239,7 +239,7 @@ namespace Axle {
                 }
 
                 for (Layer* layer : *(app->m_LayerStack)) {
-                    ZoneScopedN("Layer OnRender");
+                    ZoneScopedN("Layer OnImGuiRender");
                     layer->OnImGuiRender(elapsed);
                 }
 

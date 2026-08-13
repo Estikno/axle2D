@@ -32,7 +32,22 @@ namespace Axle {
         Depth24Stencil8,
         Depth32F
     };
-    enum class TextureType { Diffuse = 0, Specular, Unknown };
+
+    // Values match one to one to aimp's texture type
+    enum class TextureType : u8 {
+        BaseColor,         // binding 0
+        Normal,            // binding 1
+        MetallicRoughness, // binding 2 (G=roughness, B=metalness, glTF-packed)
+        AO,                // binding 3
+        Emissive,          // binding 4
+        Height,            // binding 5 (parallax/displacement)
+        Opacity,           // binding 6
+        Unknown,
+
+        MaxTextureType
+    };
+
+    TextureType TextureAssimpTypeToTextureType(u32 assimpType);
 
     struct FaceExtract {
         u32 target;
