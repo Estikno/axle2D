@@ -165,7 +165,7 @@ namespace Axle {
         AX_GL_CALL(glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     }
 
-    Texture2D::Texture2D(const std::string& path, i32 mipmaps, bool flipVertically, TextureType type)
+    Texture2D::Texture2D(const std::string& path, i32 mipmaps, bool sRGBSpace, bool flipVertically, TextureType type)
         : m_Type(type) {
         ZoneScopedN("Create texture with source");
 
@@ -201,14 +201,18 @@ namespace Axle {
             internalFormat = GL_RED;
             dataFormat = GL_RED;
             m_InternalFormat = TextureFormat::R8;
+        } else if (nrChannels == 2) {
+            internalFormat = GL_RG8;
+            dataFormat = GL_RG;
+            m_InternalFormat = TextureFormat::RG8;
         } else if (nrChannels == 3) {
-            internalFormat = GL_RGB8;
+            internalFormat = (sRGBSpace) ? GL_SRGB8 : GL_RGB8;
             dataFormat = GL_RGB;
-            m_InternalFormat = TextureFormat::RGB8;
+            m_InternalFormat = (sRGBSpace) ? TextureFormat::SRGB8 : TextureFormat::RGB8;
         } else if (nrChannels == 4) {
-            internalFormat = GL_RGBA8;
+            internalFormat = (sRGBSpace) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
             dataFormat = GL_RGBA;
-            m_InternalFormat = TextureFormat::RGBA8;
+            m_InternalFormat = (sRGBSpace) ? TextureFormat::SRGB8Alpha8 : TextureFormat::RGBA8;
         } else {
             AX_PANIC(LogChannel::Renderer, "Image format not supported");
         }
@@ -235,14 +239,16 @@ namespace Axle {
         stbi_image_free(data);
     }
 
-    Ref<Texture2D> Texture2D::Create(const std::string& filename, i32 mipmaps, TextureType type, bool checkCached) {
+    Ref<Texture2D>
+    Texture2D::Create(const std::string& filename, i32 mipmaps, bool sRGBSpace, TextureType type, bool checkCached) {
         if (checkCached) {
             Result<Ref<Texture2D>> res = TextureManager::IsCached2D(filename);
             if (res.IsOk())
                 return res.Unwrap();
         }
 
-        Ref<Texture2D> tex = Ref<Texture2D>::Create(filename, mipmaps, true, type); // strong count now 1, safely
+        Ref<Texture2D> tex =
+            Ref<Texture2D>::Create(filename, mipmaps, sRGBSpace, true, type); // strong count now 1, safely
 
         if (checkCached)
             TextureManager::Cache2D(filename, tex); // takes a WeakRef from an already-owned Ref
@@ -290,7 +296,7 @@ namespace Axle {
     // Texture Cubemap
     // --------------
 
-    TextureCubemap::TextureCubemap(const std::string& path, bool flipVertically) {
+    TextureCubemap::TextureCubemap(const std::string& path, bool sRGBSpace, bool flipVertically) {
         ZoneScopedN("Create cubemap texture");
 
         // Load data
@@ -329,14 +335,18 @@ namespace Axle {
             internalFormat = GL_RED;
             dataFormat = GL_RED;
             m_InternalFormat = TextureFormat::R8;
+        } else if (nrChannels == 2) {
+            internalFormat = GL_RG8;
+            dataFormat = GL_RG;
+            m_InternalFormat = TextureFormat::RG8;
         } else if (nrChannels == 3) {
-            internalFormat = GL_RGB8;
+            internalFormat = (sRGBSpace) ? GL_SRGB8 : GL_RGB8;
             dataFormat = GL_RGB;
-            m_InternalFormat = TextureFormat::RGB8;
+            m_InternalFormat = (sRGBSpace) ? TextureFormat::SRGB8 : TextureFormat::RGB8;
         } else if (nrChannels == 4) {
-            internalFormat = GL_RGBA8;
+            internalFormat = (sRGBSpace) ? GL_SRGB8_ALPHA8 : GL_RGBA8;
             dataFormat = GL_RGBA;
-            m_InternalFormat = TextureFormat::RGBA8;
+            m_InternalFormat = (sRGBSpace) ? TextureFormat::SRGB8Alpha8 : TextureFormat::RGBA8;
         } else {
             AX_PANIC(LogChannel::Renderer, "Image format not supported");
         }
@@ -368,14 +378,14 @@ namespace Axle {
         stbi_image_free(data);
     }
 
-    Ref<TextureCubemap> TextureCubemap::Create(const std::string& filename, bool checkCached) {
+    Ref<TextureCubemap> TextureCubemap::Create(const std::string& filename, bool sRGBSpace, bool checkCached) {
         if (checkCached) {
             Result<Ref<TextureCubemap>> res = TextureManager::IsCachedCubemap(filename);
             if (res.IsOk())
                 return res.Unwrap();
         }
 
-        Ref<TextureCubemap> tex = Ref<TextureCubemap>::Create(filename); // strong count now 1, safely
+        Ref<TextureCubemap> tex = Ref<TextureCubemap>::Create(filename, sRGBSpace); // strong count now 1, safely
 
         if (checkCached)
             TextureManager::CacheCubemap(filename, tex); // takes a WeakRef from an already-owned Ref

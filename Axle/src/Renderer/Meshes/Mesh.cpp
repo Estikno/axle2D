@@ -75,28 +75,31 @@ namespace Axle {
         // Texture binding
         for (u32 i = 0; i < m_Textures.size(); ++i) {
             switch (m_Textures[i]->GetType()) {
-                case TextureType::Diffuse:
+                case TextureType::BaseColor:
                     // TODO: Instead of panicking simply log a warn message
                     AX_ENSURE(DiffuseTextureNr < TextureUnitOffset,
                               LogChannel::Renderer,
                               "Reached maximum number of diffuse textures. Can't bind more");
-                    m_Textures[i]->Bind(DiffuseTextureNr + static_cast<u32>(TextureType::Diffuse) * TextureUnitOffset);
+                    m_Textures[i]->Bind(DiffuseTextureNr +
+                                        static_cast<u32>(TextureType::BaseColor) * TextureUnitOffset);
                     DiffuseTextureNr++;
-                    break;
-                case TextureType::Specular:
-                    // TODO: Instead of panicking simply log a warn message
-                    AX_ENSURE(SpecularTextureNr < TextureUnitOffset,
-                              LogChannel::Renderer,
-                              "Reached maximum number of specular textures. Can't bind more");
-                    m_Textures[i]->Bind(SpecularTextureNr +
-                                        static_cast<u32>(TextureType::Specular) * TextureUnitOffset);
-                    SpecularTextureNr++;
-                    break;
+                    continue;
+                // case TextureType::Specular:
+                //     // TODO: Instead of panicking simply log a warn message
+                //     AX_ENSURE(SpecularTextureNr < TextureUnitOffset,
+                //               LogChannel::Renderer,
+                //               "Reached maximum number of specular textures. Can't bind more");
+                //     m_Textures[i]->Bind(SpecularTextureNr +
+                //                         static_cast<u32>(TextureType::Specular) * TextureUnitOffset);
+                //     SpecularTextureNr++;
+                //     break;
                 case TextureType::Unknown:
                     // TODO: Maybe make a special case for unusual textures
                     AX_CORE_WARN(LogChannel::Renderer, "Can't bind a texture with and unknown type");
-                    break;
+                    continue;
             }
+
+            AX_ASSERT(false, LogChannel::Renderer, "Unsupported texture type");
         }
 
         // Draw the mesh

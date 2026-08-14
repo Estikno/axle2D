@@ -15,7 +15,7 @@ namespace Axle {
         Material() = default;
 
         // Material(const Ref<Shader>& shader, const T* data);
-        Material(const std::string& shader, const T* data);
+        Material(const std::string& shader, const T* data, const std::vector<Ref<Texture>>& textures);
 
         ~Material() override;
 

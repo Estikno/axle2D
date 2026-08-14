@@ -102,14 +102,15 @@ namespace Axle {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
         std::vector<Ref<Texture2D>> diffuseMaps =
-            LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::Diffuse, model->m_Directory);
+            LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::BaseColor, model->m_Directory);
         textures.insert(
             textures.end(), std::make_move_iterator(diffuseMaps.begin()), std::make_move_iterator(diffuseMaps.end()));
 
-        std::vector<Ref<Texture2D>> specularMaps =
-            LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::Specular, model->m_Directory);
-        textures.insert(
-            textures.end(), std::make_move_iterator(specularMaps.begin()), std::make_move_iterator(specularMaps.end()));
+        // std::vector<Ref<Texture2D>> specularMaps =
+        //     LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::Specular, model->m_Directory);
+        // textures.insert(
+        //     textures.end(), std::make_move_iterator(specularMaps.begin()),
+        //     std::make_move_iterator(specularMaps.end()));
 
         return Mesh(vertices, indices, std::move(textures));
     }
@@ -127,7 +128,7 @@ namespace Axle {
 
             std::string filename = directory + "/" + std::string(str.C_Str());
 
-            Ref<Texture2D> tex = Texture2D::Create(filename, -1, type);
+            Ref<Texture2D> tex = Texture2D::Create(filename, -1, type == TextureType::BaseColor, type);
             textures.push_back(std::move(tex));
         }
 

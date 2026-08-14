@@ -28,7 +28,7 @@ namespace Axle {
 
         s_UBO = Ref<UniformBuffer>::Create(sizeof(ScenePOD), nullptr);
         s_DTextureVAO = VertexArray::ScreenQuad();
-        s_TexShader = Shader::Create("Sandbox/src/Shaders/textureDraw.bin");
+        s_TexShader = Shader::Create("Axle/src/Renderer/Shaders/Sources/PostProcess.bin");
     }
 
     void Renderer::Shutdown() {

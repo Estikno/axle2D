@@ -64,9 +64,9 @@ namespace Axle {
             Camera& cam = editor->GetCamera();
             editor->UpdateCamera(static_cast<f32>(deltaTime));
 
-            // SceneHandle handle1 = Renderer::BeginScene(cam, nullptr, nullptr);
+            SceneHandle handle1 = Renderer::BeginScene(cam, nullptr, editor->GetFBOFinal());
 
-            const Ref<FrameBuffer>& fBuffer = editor->GetFBO();
+            const Ref<FrameBuffer>& fBuffer = editor->GetFBOLinear();
             SceneHandle handle2 = Renderer::BeginScene(cam, skybox, fBuffer);
 
             model.Draw(shader, transform);
@@ -74,10 +74,10 @@ namespace Axle {
 
             Renderer::EndScene(handle2);
 
-            // fBuffer->GetTexture()->Bind(0);
-            // Renderer::Submit(fBuffer->GetTexture());
-            //
-            // Renderer::EndScene(handle1);
+            fBuffer->GetTexture()->Bind(0);
+            Renderer::Submit(fBuffer->GetTexture());
+
+            Renderer::EndScene(handle1);
         }
 
         virtual void OnImGuiRender(f64 deltaTime) override {

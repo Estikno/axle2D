@@ -21,7 +21,7 @@ namespace Axle {
         m_VAO = VertexArray::ScreenQuad();
 
         // Setup texture and program
-        m_CubemapTexture = TextureCubemap::Create(texture);
+        m_CubemapTexture = TextureCubemap::Create(texture, true);
         m_Shader = Shader::Create(program);
     }
 

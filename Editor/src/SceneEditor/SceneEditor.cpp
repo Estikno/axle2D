@@ -13,7 +13,8 @@
 namespace Axle {
     SceneEditor::SceneEditor()
         : m_Camera(new CameraPositionerDebug(), true) {
-        m_FBO = Ref<FrameBuffer>::Create(900, 600, true, false);
+        m_FBOLinear = Ref<FrameBuffer>::Create(900, 600, true, false);
+        m_FBOFinal = Ref<FrameBuffer>::Create(900, 600, true, false);
     }
 
     void SceneEditor::UpdateCamera(f32 deltatime) {
@@ -48,7 +49,7 @@ namespace Axle {
         m_PendingWidth = static_cast<u32>(texSize.x);
         m_PendingHeight = static_cast<u32>(texSize.y);
 
-        ImTextureID texID = (ImTextureID) (intptr_t) m_FBO->GetTexture()->GetID();
+        ImTextureID texID = (ImTextureID) (intptr_t) m_FBOFinal->GetTexture()->GetID();
         ImGui::Image(texID, texSize, ImVec2(0, 1), ImVec2(1, 0));
 
         glm::mat4 view = m_Camera.GetViewMatrix();

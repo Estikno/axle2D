@@ -15,13 +15,18 @@ namespace Axle {
         SceneEditor();
 
         inline void PreDraw() {
-            m_FBO->Resize(m_PendingWidth, m_PendingHeight);
+            m_FBOLinear->Resize(m_PendingWidth, m_PendingHeight);
+            m_FBOFinal->Resize(m_PendingWidth, m_PendingHeight);
         }
         void UpdateCamera(f32 deltatime);
         void ImguiDraw(f32 deltatime, glm::mat4& transformSelected);
 
-        inline const Ref<FrameBuffer>& GetFBO() const {
-            return m_FBO;
+        inline const Ref<FrameBuffer>& GetFBOLinear() const {
+            return m_FBOLinear;
+        }
+
+        inline const Ref<FrameBuffer>& GetFBOFinal() const {
+            return m_FBOFinal;
         }
 
         inline Camera& GetCamera() {
@@ -29,7 +34,8 @@ namespace Axle {
         }
 
     private:
-        Ref<FrameBuffer> m_FBO;
+        Ref<FrameBuffer> m_FBOLinear;
+        Ref<FrameBuffer> m_FBOFinal;
         Camera m_Camera;
 
         bool m_WindowHovered = false;
