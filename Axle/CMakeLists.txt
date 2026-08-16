@@ -90,6 +90,9 @@ set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory("${VENDOR}/assimp")
+target_include_directories(assimp PRIVATE
+    "${VENDOR}/assimp/contrib/unzip"
+)
 
 if(UNIX)
     set_target_properties(assimp PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
