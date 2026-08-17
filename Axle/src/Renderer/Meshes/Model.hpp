@@ -15,7 +15,7 @@ namespace Axle {
         Model() = default;
         Model(const std::string& path);
 
-        void Draw(const Ref<Shader>& shader, const glm::mat4& transform = glm::mat4(1.0f));
+        void Draw(const glm::mat4& transform = glm::mat4(1.0f));
 
     private:
         struct InternalMethods;

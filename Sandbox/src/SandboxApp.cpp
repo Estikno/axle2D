@@ -70,7 +70,7 @@ public:
         modelMatrix =
             glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
 
-        model.Draw(shader, modelMatrix);
+        model.Draw(modelMatrix);
 
         Renderer::EndScene(handle2);
 

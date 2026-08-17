@@ -31,7 +31,7 @@ in VS_OUT {
     mat3 TBN;
 } fs_in;
 
-uniform mat4 u_NormalMatrix; // transpose(inverse(mat3(uModel))), computed CPU-side
+uniform mat3 u_NormalMatrix; // transpose(inverse(mat3(uModel))), computed CPU-side
 
 // Temporal light data
 uniform vec3  u_LightPos;
@@ -40,7 +40,7 @@ uniform float u_LightIntensity;
 
 layout(binding = 0) uniform sampler2D t_BaseColor;
 layout(binding = 1) uniform sampler2D t_Normal;
-layout(binding = 2) uniform sampler2D t_MetallicRoughness
+layout(binding = 2) uniform sampler2D t_MetallicRoughness;
 layout(binding = 3) uniform sampler2D t_AO;
 layout(binding = 4) uniform sampler2D t_Emissive;
 layout(binding = 5) uniform sampler2D t_Height;
@@ -90,7 +90,7 @@ vec3 BRDF(vec3 n, vec3 v, vec3 l, vec3 diffuseColor, vec3 f0, float roughness) {
 void main() {
     // --- Sample textures ---
     vec4 baseColorSample = texture(t_BaseColor, fs_in.uv);
-    vec3 baseColor = baseColorSample.rgb * uBaseColorFactor;
+    vec3 baseColor = baseColorSample.rgb * u_BaseColorFactor;
 
     vec2 mr = texture(t_MetallicRoughness, fs_in.uv).gb; // g=rough, b=metal
     float perceptualRoughness = clamp(mr.x * u_RoughnessFactor, 0.0, 1.0);

@@ -30,22 +30,24 @@ namespace Axle {
     static_assert(offsetof(MaterialPOD, Reflectance) == 20);
     static_assert(offsetof(MaterialPOD, EmissiveFactor) == 32);
 
-    template <typename T = MaterialPOD>
     class Material : public RefCounted {
     public:
         Material() = default;
 
-        Material(const std::string& shader, u32 size, const T* data, const std::vector<Ref<Texture>>& textures);
+        Material(const std::string& shader,
+                 u32 size,
+                 const void* data,
+                 const std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)>& textures);
 
         ~Material() override;
 
-        Material<T>(Material<T>&& other) noexcept;
-        Material<T>& operator=(Material<T>&& other) noexcept;
+        Material(Material&& other) noexcept;
+        Material& operator=(Material&& other) noexcept;
 
-        Material<T>(const Material<T>&) = delete;
-        Material<T>& operator=(const Material<T>&) = delete;
+        Material(const Material&) = delete;
+        Material& operator=(const Material&) = delete;
 
-        void Bind(u32 bindingIndex) const;
+        void Bind() const;
 
         void UpdateData(u32 offset, u32 size, const void* data);
 
@@ -62,6 +64,9 @@ namespace Axle {
 
         Ref<Shader> m_Shader;
         Ref<UniformBuffer> m_UBO;
-        std::vector<Ref<Texture>> m_Textures;
+        std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)> m_Textures;
+
+        Ref<Texture2D> m_WhiteFallback;
+        Ref<Texture2D> m_NormalFallback;
     };
 } // namespace Axle

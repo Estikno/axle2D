@@ -26,7 +26,7 @@ namespace Axle {
         VertexArray& operator=(const VertexArray&) = delete;
 
         void AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer);
-        void SetIndexBuffer(const Ref<ElementBuffer>& indexBuffer);
+        void SetElementBuffer(const Ref<ElementBuffer>& elementBuffer);
 
         void Bind() const;
         void Unbind() const;

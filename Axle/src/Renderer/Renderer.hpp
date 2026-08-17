@@ -9,6 +9,7 @@
 #include "Renderer/Skybox/Skybox.hpp"
 #include "Renderer/Textures/Texture.hpp"
 #include "Renderer/Buffers/UniformBuffer.hpp"
+#include "Renderer/Material/Material.hpp"
 
 #include "glm/fwd.hpp"
 
@@ -66,6 +67,9 @@ namespace Axle {
                            const Ref<VertexArray>& vertexArray,
                            const glm::mat4& transform = glm::mat4(1.0f));
         static void Submit(const Ref<Texture2D>& texture);
+        static void Submit(const Ref<Material>& material,
+                           const Ref<VertexArray>& vertexArray,
+                           const glm::mat4& transform = glm::mat4(1.0f));
 
         static void OnFrameBufferResize(u32 width, u32 height);
 

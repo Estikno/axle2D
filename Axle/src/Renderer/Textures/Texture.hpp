@@ -42,9 +42,8 @@ namespace Axle {
         Emissive,          // binding 4
         Height,            // binding 5 (parallax/displacement)
         Opacity,           // binding 6
-        Unknown,
 
-        MaxTextureType
+        Unknown,
     };
 
     TextureType TextureAssimpTypeToTextureType(u32 assimpType);

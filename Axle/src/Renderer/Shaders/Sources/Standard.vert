@@ -19,7 +19,7 @@ layout (std140, binding = 0) uniform Scene {
 };
 
 uniform mat4 u_Model;
-uniform mat4 u_NormalMatrix; // transpose(inverse(mat3(uModel))), computed CPU-side
+uniform mat3 u_NormalMatrix; // transpose(inverse(mat3(uModel))), computed CPU-side
 
 out VS_OUT {
     vec3 worldPos;

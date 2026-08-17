@@ -41,7 +41,7 @@ namespace Axle {
             // Shaders
             shader = Shader::Create("Sandbox/src/Shaders/default.bin");
             // Model
-            model = Model("assets/tests/backpack/backpack.obj");
+            model = Model("assets/tests/car/scene.gltf");
 
             // Skybox
             skybox = Ref<Skybox>::Create("assets/tests/skybox1.png", "Sandbox/src/Shaders/skybox.bin");
@@ -69,7 +69,7 @@ namespace Axle {
             const Ref<FrameBuffer>& fBuffer = editor->GetFBOLinear();
             SceneHandle handle2 = Renderer::BeginScene(cam, skybox, fBuffer);
 
-            model.Draw(shader, transform);
+            model.Draw(transform);
             grid->Draw();
 
             Renderer::EndScene(handle2);
@@ -100,7 +100,7 @@ namespace Axle {
         Model model;
         Ref<Skybox> skybox;
         Ref<Shader> shader;
-        glm::mat4 transform = glm::mat4(1.0f);
+        glm::mat4 transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
 
         SceneEditor* editor = nullptr;
         Grid* grid = nullptr;

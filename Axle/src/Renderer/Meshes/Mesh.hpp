@@ -5,8 +5,8 @@
 #include "Core/Types.hpp"
 #include "Renderer/Textures/Texture.hpp"
 #include "Renderer/Buffers/VertexArray.hpp"
-#include "Renderer/Shaders/Shader.hpp"
 #include "Other/CustomTypes/Ref.hpp"
+#include "Renderer/Material/Material.hpp"
 
 #include <glm/glm.hpp>
 
@@ -15,30 +15,30 @@ namespace Axle {
         glm::vec3 position;
         glm::vec3 normal;
         glm::vec2 textureCoords;
+        glm::vec4 tangent;
     };
 
     class Mesh {
     public:
         Mesh(const std::vector<Vertex>& vertices,
              const std::vector<u32>& indices,
-             std::vector<Ref<Texture2D>>&& textures);
+             std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)>&& textures,
+             const MaterialPOD& pod);
 
-        Mesh(const Mesh&) = delete;
-        Mesh& operator=(const Mesh&) = delete;
+        ~Mesh();
 
         Mesh(Mesh&& other) noexcept;
         Mesh& operator=(Mesh&& other) noexcept;
 
-        void Draw(const Ref<Shader>& shader, const glm::mat4& transform = glm::mat4(1.0f));
+        Mesh(const Mesh&) = delete;
+        Mesh& operator=(const Mesh&) = delete;
+
+        void Draw(const glm::mat4& transform = glm::mat4(1.0f));
 
     private:
-        void SetupMesh();
+        void Reset();
 
         Ref<VertexArray> m_VAO;
-
-        // Data
-        std::vector<Vertex> m_Vertices;
-        std::vector<u32> m_Indices;
-        std::vector<Ref<Texture2D>> m_Textures;
+        Ref<Material> m_Material;
     };
 } // namespace Axle

@@ -15,6 +15,9 @@
 #include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
 #include "Core/Application.hpp"
+#include "Core/Types.hpp"
+
+#include "glm/matrix.hpp"
 
 namespace Axle {
     std::vector<SceneData> Renderer::s_SceneData;
@@ -93,6 +96,21 @@ namespace Axle {
         RenderCommand::DrawElements(s_DTextureVAO);
     }
 
+    void
+    Renderer::Submit(const Ref<Material>& material, const Ref<VertexArray>& vertexArray, const glm::mat4& transform) {
+        material->Bind();
+        material->GetShader()->SetMat4Uniform("u_Model", transform);
+
+        // TODO: Clean this temporary uniforms
+        material->GetShader()->SetMat3Uniform("u_NormalMatrix", glm::transpose(glm::inverse(glm::mat3(transform))));
+        material->GetShader()->SetVec3Uniform("u_LightPos", glm::vec3(10.0f, 10.0f, 0.0f));
+        material->GetShader()->SetVec3Uniform("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        material->GetShader()->SetFloatUniform("u_LightIntensity", 1.0f);
+
+        vertexArray->Bind();
+        RenderCommand::DrawElements(vertexArray);
+    }
+
     void Renderer::OnFrameBufferResize(u32 width, u32 height) {
         if (s_SceneData.empty()) {
             RenderCommand::SetViewport(0, 0, width, height);
@@ -108,7 +126,7 @@ namespace Axle {
         // Update UBO
         ScenePOD podData(data);
         s_UBO->UpdateData(0, sizeof(ScenePOD), &podData);
-        s_UBO->Bind(0);
+        s_UBO->Bind(SCENE_UBO_BINDING);
 
         // Bind FrameBuffer
         if (data.RenderTarget)

@@ -44,4 +44,8 @@ namespace Axle {
 
 #define EVENT_INPUT_TAG 0
 #define LAYERS_TAG 1
+
+    // Renderer defines
+#define SCENE_UBO_BINDING 0
+#define MATERIAL_UBO_BINDING 1
 } // namespace Axle

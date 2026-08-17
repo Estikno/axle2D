@@ -21,7 +21,7 @@ namespace Axle {
         // vBuffer->SetLayout(s_Layout);
 
         // m_VAO->AddVertexBuffer(vBuffer);
-        m_VAO->SetIndexBuffer(eBuffer);
+        m_VAO->SetElementBuffer(eBuffer);
 
         m_Shader = Shader::Create("Editor/src/Shaders/Grid.bin");
     }

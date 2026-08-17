@@ -198,7 +198,7 @@ namespace Axle {
         GLenum internalFormat;
         GLenum dataFormat;
         if (nrChannels == 1) {
-            internalFormat = GL_RED;
+            internalFormat = GL_R8;
             dataFormat = GL_RED;
             m_InternalFormat = TextureFormat::R8;
         } else if (nrChannels == 2) {
@@ -340,7 +340,7 @@ namespace Axle {
         GLenum internalFormat;
         GLenum dataFormat;
         if (nrChannels == 1) {
-            internalFormat = GL_RED;
+            internalFormat = GL_R8;
             dataFormat = GL_RED;
             m_InternalFormat = TextureFormat::R8;
         } else if (nrChannels == 2) {

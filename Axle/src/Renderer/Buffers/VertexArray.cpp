@@ -35,7 +35,7 @@ namespace Axle {
         vBuffer->SetLayout(layout);
 
         vArray->AddVertexBuffer(vBuffer);
-        vArray->SetIndexBuffer(eBuffer);
+        vArray->SetElementBuffer(eBuffer);
 
         return vArray;
     }
@@ -89,12 +89,12 @@ namespace Axle {
         m_VertexBuffers.push_back(vertexBuffer);
     }
 
-    void VertexArray::SetIndexBuffer(const Ref<ElementBuffer>& indexBuffer) {
+    void VertexArray::SetElementBuffer(const Ref<ElementBuffer>& elementBuffer) {
         TracyGpuZone("Add IndexBuffer to VertexArray");
 
-        AX_GL_CALL(glVertexArrayElementBuffer(m_ID, indexBuffer->GetID()));
+        AX_GL_CALL(glVertexArrayElementBuffer(m_ID, elementBuffer->GetID()));
 
-        m_ElementBuffer = indexBuffer;
+        m_ElementBuffer = elementBuffer;
     }
 
     void VertexArray::Bind() const {

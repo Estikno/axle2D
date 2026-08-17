@@ -3,6 +3,7 @@
 #include "Model.hpp"
 #include "Renderer/Meshes/Mesh.hpp"
 #include "Renderer/Textures/Texture.hpp"
+#include "Core/Error/Panic.hpp"
 #include "Core/Logger/Log.hpp"
 #include "Core/Resource/ResourceManager.hpp"
 
@@ -19,15 +20,16 @@ namespace Axle {
     struct Model::InternalMethods {
         static void ProcessNode(aiNode* node, const aiScene* scene, Model* model);
         static Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, Model* model);
-        static std::vector<Ref<Texture2D>>
-        LoadMaterialTextures(aiMaterial* mat, aiTextureType aiType, TextureType type, const std::string& directory);
+        static Ref<Texture2D>
+        LoadMaterialTexture(aiMaterial* mat, aiTextureType aiType, TextureType type, const std::string& directory);
     };
 
     Model::Model(const std::string& path) {
         ZoneScopedN("Create model");
 
         Assimp::Importer import;
-        const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        const aiScene* scene =
+            import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
         if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
             AX_CORE_ERROR(LogChannel::Renderer,
@@ -47,11 +49,11 @@ namespace Axle {
         InternalMethods::ProcessNode(scene->mRootNode, scene, this);
     }
 
-    void Model::Draw(const Ref<Shader>& shader, const glm::mat4& transform) {
+    void Model::Draw(const glm::mat4& transform) {
         ZoneScopedN("Draw model");
 
         for (u32 i = 0; i < m_Meshes.size(); ++i) {
-            m_Meshes[i].Draw(shader, transform);
+            m_Meshes[i].Draw(transform);
         }
     }
 
@@ -75,7 +77,7 @@ namespace Axle {
 
         std::vector<Vertex> vertices;
         std::vector<u32> indices;
-        std::vector<Ref<Texture2D>> textures;
+        std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)> textures;
 
         // Vertex data
         for (u32 i = 0; i < mesh->mNumVertices; ++i) {
@@ -83,6 +85,23 @@ namespace Axle {
             vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
             vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 
+            // tangents
+            if (mesh->mTangents != nullptr) {
+                glm::vec3 tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+                glm::vec3 bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+
+                // Handedness: does Assimp's bitangent agree with cross(N, T)?
+                float handedness = (glm::dot(glm::cross(vertex.normal, tangent), bitangent) < 0.0f) ? -1.0f : 1.0f;
+
+                vertex.tangent = glm::vec4(tangent, handedness);
+            } else {
+                // No UVs / tangent generation failed for this mesh — flag it so normal mapping
+                // is skipped or falls back to a per-triangle tangent computed post-load.
+                vertex.tangent = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                AX_ASSERT(false, LogChannel::Renderer, "No tangent found in import");
+            }
+
+            // uv's
             if (mesh->mTextureCoords[0] != nullptr)
                 vertex.textureCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
             else
@@ -101,37 +120,61 @@ namespace Axle {
         // Material
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-        std::vector<Ref<Texture2D>> diffuseMaps =
-            LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::BaseColor, model->m_Directory);
-        textures.insert(
-            textures.end(), std::make_move_iterator(diffuseMaps.begin()), std::make_move_iterator(diffuseMaps.end()));
+#define LOAD_MATERIAL_TEXTURE(aiType, aiType2, type)                        \
+    temp = LoadMaterialTexture(material, aiType, type, model->m_Directory); \
+    if (temp)                                                               \
+        textures[static_cast<u32>(type)] = std::move(temp);                 \
+    else                                                                    \
+        textures[static_cast<u32>(type)] = LoadMaterialTexture(material, aiType2, type, model->m_Directory);
 
-        // std::vector<Ref<Texture2D>> specularMaps =
-        //     LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::Specular, model->m_Directory);
-        // textures.insert(
-        //     textures.end(), std::make_move_iterator(specularMaps.begin()),
-        //     std::make_move_iterator(specularMaps.end()));
+        // Textures
+        Ref<Texture2D> temp;
+        LOAD_MATERIAL_TEXTURE(aiTextureType_DIFFUSE, aiTextureType_BASE_COLOR, TextureType::BaseColor);
+        LOAD_MATERIAL_TEXTURE(aiTextureType_NORMALS, aiTextureType_NORMAL_CAMERA, TextureType::Normal);
+        LOAD_MATERIAL_TEXTURE(
+            aiTextureType_GLTF_METALLIC_ROUGHNESS, aiTextureType_METALNESS, TextureType::MetallicRoughness);
+        LOAD_MATERIAL_TEXTURE(aiTextureType_AMBIENT_OCCLUSION, aiTextureType_LIGHTMAP, TextureType::AO);
+        LOAD_MATERIAL_TEXTURE(aiTextureType_EMISSIVE, aiTextureType_EMISSION_COLOR, TextureType::Emissive);
+        LOAD_MATERIAL_TEXTURE(aiTextureType_HEIGHT, aiTextureType_DISPLACEMENT, TextureType::Height);
+        LOAD_MATERIAL_TEXTURE(aiTextureType_OPACITY, aiTextureType_OPACITY, TextureType::Opacity);
 
-        return Mesh(vertices, indices, std::move(textures));
+        // POD
+        MaterialPOD pod; // struct defaults as a last-resort fallback
+
+        aiColor4D baseColor;
+        if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_BASE_COLOR, &baseColor))
+            pod.BaseColorFactor = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+
+        f32 metallic;
+        if (AI_SUCCESS == aiGetMaterialFloat(material, AI_MATKEY_METALLIC_FACTOR, &metallic))
+            pod.MetallicFactor = metallic;
+
+        f32 roughness;
+        if (AI_SUCCESS == aiGetMaterialFloat(material, AI_MATKEY_ROUGHNESS_FACTOR, &roughness))
+            pod.RoughnessFactor = roughness;
+
+        return Mesh(vertices, indices, std::move(textures), pod);
     }
 
-    std::vector<Ref<Texture2D>> Model::InternalMethods::LoadMaterialTextures(aiMaterial* mat,
-                                                                             aiTextureType aiType,
-                                                                             TextureType type,
-                                                                             const std::string& directory) {
+    Ref<Texture2D> Model::InternalMethods::LoadMaterialTexture(aiMaterial* mat,
+                                                               aiTextureType aiType,
+                                                               TextureType type,
+                                                               const std::string& directory) {
         ZoneScopedN("Load material textures");
-        std::vector<Ref<Texture2D>> textures;
+        Ref<Texture2D> texture;
 
-        for (u32 i = 0; i < mat->GetTextureCount(aiType); ++i) {
+        AX_ASSERT(mat->GetTextureCount(aiType) <= 1,
+                  LogChannel::Renderer,
+                  "Can't support multiple textures of the same type");
+        if (mat->GetTextureCount(aiType) > 0) {
             aiString str;
-            mat->GetTexture(aiType, i, &str);
+            mat->GetTexture(aiType, 0, &str);
 
             std::string filename = directory + "/" + std::string(str.C_Str());
 
-            Ref<Texture2D> tex = Texture2D::Create(filename, -1, type == TextureType::BaseColor, type);
-            textures.push_back(std::move(tex));
+            texture = Texture2D::Create(filename, -1, type == TextureType::BaseColor, type);
         }
 
-        return textures;
+        return texture;
     }
 } // namespace Axle
