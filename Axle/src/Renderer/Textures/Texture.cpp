@@ -256,6 +256,14 @@ namespace Axle {
         return tex;
     }
 
+    Ref<Texture2D> Texture2D::Create1x1(u8 r, u8 g, u8 b, u8 a) {
+        Ref<Texture2D> tex = Ref<Texture2D>::Create(1, 1, TextureFormat::RGBA8, 0);
+        std::array<u8, 4> color = {r, g, b, a};
+
+        AX_GL_CALL(glTextureSubImage2D(tex->GetID(), 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color.data()));
+        return tex;
+    }
+
     Texture2D::~Texture2D() {
         Reset();
     }

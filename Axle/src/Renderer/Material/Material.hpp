@@ -8,14 +8,34 @@
 #include "Renderer/Buffers/UniformBuffer.hpp"
 #include "Renderer/Textures/Texture.hpp"
 
+#include "glm/fwd.hpp"
+
 namespace Axle {
-    template <typename T>
+    struct MaterialPOD {
+        glm::vec3 BaseColorFactor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        f32 MetallicFactor = 1.0f;
+        f32 RoughnessFactor = 1.0f;
+        f32 Reflectance = 0.5f;
+
+        f32 _Pad0; // matches std140's implicit padding after a vec3
+        f32 _Pad1; // matches std140's implicit padding after a vec3
+
+        glm::vec3 EmissiveFactor = glm::vec3(0.0f, 0.0f, 0.0f);
+    };
+
+    static_assert(offsetof(MaterialPOD, BaseColorFactor) == 0);
+    static_assert(offsetof(MaterialPOD, MetallicFactor) == 12);
+    static_assert(offsetof(MaterialPOD, RoughnessFactor) == 16);
+    static_assert(offsetof(MaterialPOD, Reflectance) == 20);
+    static_assert(offsetof(MaterialPOD, EmissiveFactor) == 32);
+
+    template <typename T = MaterialPOD>
     class Material : public RefCounted {
     public:
         Material() = default;
 
-        // Material(const Ref<Shader>& shader, const T* data);
-        Material(const std::string& shader, const T* data, const std::vector<Ref<Texture>>& textures);
+        Material(const std::string& shader, u32 size, const T* data, const std::vector<Ref<Texture>>& textures);
 
         ~Material() override;
 

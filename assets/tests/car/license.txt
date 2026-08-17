@@ -1,0 +1,8 @@
+Model Information:
+* title:	AC - Mclaren P1 [FREE]
+* source:	https://sketchfab.com/3d-models/ac-mclaren-p1-free-747cedadc302451db61deafc85941395
+* author:	David & 3D (https://sketchfab.com/DavidAnd3D)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

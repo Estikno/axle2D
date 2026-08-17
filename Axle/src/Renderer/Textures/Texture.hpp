@@ -146,6 +146,8 @@ namespace Axle {
                                      TextureType type = TextureType::Unknown,
                                      bool checkCached = true);
 
+        static Ref<Texture2D> Create1x1(u8 r, u8 g, u8 b, u8 a);
+
         virtual ~Texture2D() override;
 
         Texture2D(Texture2D&& other) noexcept;
