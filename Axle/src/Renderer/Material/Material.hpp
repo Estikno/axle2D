@@ -18,8 +18,8 @@ namespace Axle {
         f32 RoughnessFactor = 1.0f;
         f32 Reflectance = 0.5f;
 
-        f32 _Pad0; // matches std140's implicit padding after a vec3
-        f32 _Pad1; // matches std140's implicit padding after a vec3
+        f32 _Pad0; // matches std140's padding
+        f32 _Pad1; // matches std140's padding
 
         glm::vec3 EmissiveFactor = glm::vec3(0.0f, 0.0f, 0.0f);
     };
