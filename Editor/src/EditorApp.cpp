@@ -100,7 +100,7 @@ namespace Axle {
         Model model;
         Ref<Skybox> skybox;
         Ref<Shader> shader;
-        glm::mat4 transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
+        glm::mat4 transform = glm::mat4(1.0f);
 
         SceneEditor* editor = nullptr;
         Grid* grid = nullptr;

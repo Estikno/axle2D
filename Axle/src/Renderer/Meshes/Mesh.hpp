@@ -23,7 +23,8 @@ namespace Axle {
         Mesh(const std::vector<Vertex>& vertices,
              const std::vector<u32>& indices,
              std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)>&& textures,
-             const MaterialPOD& pod);
+             const MaterialPOD& pod,
+             const glm::mat4& localTransform);
 
         ~Mesh();
 
@@ -38,6 +39,7 @@ namespace Axle {
     private:
         void Reset();
 
+        glm::mat4 m_LocalTransform;
         Ref<VertexArray> m_VAO;
         Ref<Material> m_Material;
     };

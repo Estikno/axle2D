@@ -1,5 +1,6 @@
 #include "axpch.hpp"
 
+#include "glm/fwd.hpp"
 #include <glad/gl.h>
 
 #include "Mesh.hpp"
@@ -20,7 +21,9 @@ namespace Axle {
     Mesh::Mesh(const std::vector<Vertex>& vertices,
                const std::vector<u32>& indices,
                std::array<Ref<Texture2D>, static_cast<u32>(TextureType::Unknown)>&& textures,
-               const MaterialPOD& pod) {
+               const MaterialPOD& pod,
+               const glm::mat4& localTranform)
+        : m_LocalTransform(localTranform) {
         ZoneScopedN("SetupMesh");
         TracyGpuZone("SetupMesh");
 
@@ -52,7 +55,8 @@ namespace Axle {
 
     Mesh::Mesh(Mesh&& other) noexcept
         : m_VAO(std::move(other.m_VAO)),
-          m_Material(std::move(other.m_Material)) {}
+          m_Material(std::move(other.m_Material)),
+          m_LocalTransform(std::move(other.m_LocalTransform)) {}
 
     Mesh& Mesh::operator=(Mesh&& other) noexcept {
         if (this != &other) {
@@ -60,6 +64,7 @@ namespace Axle {
 
             m_VAO = std::move(other.m_VAO);
             m_Material = std::move(other.m_Material);
+            m_LocalTransform = std::move(other.m_LocalTransform);
         }
         return *this;
     }
@@ -72,7 +77,7 @@ namespace Axle {
         TracyGpuZone("Draw mesh");
 
         // Draw the mesh
-        Renderer::Submit(m_Material, m_VAO, transform);
+        Renderer::Submit(m_Material, m_VAO, transform * m_LocalTransform);
     }
 
     void Mesh::Reset() {

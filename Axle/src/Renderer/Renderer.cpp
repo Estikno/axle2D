@@ -105,7 +105,7 @@ namespace Axle {
         material->GetShader()->SetMat3Uniform("u_NormalMatrix", glm::transpose(glm::inverse(glm::mat3(transform))));
         material->GetShader()->SetVec3Uniform("u_LightPos", glm::vec3(10.0f, 10.0f, 0.0f));
         material->GetShader()->SetVec3Uniform("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        material->GetShader()->SetFloatUniform("u_LightIntensity", 1.0f);
+        material->GetShader()->SetFloatUniform("u_LightIntensity", 100.0f);
 
         vertexArray->Bind();
         RenderCommand::DrawElements(vertexArray);

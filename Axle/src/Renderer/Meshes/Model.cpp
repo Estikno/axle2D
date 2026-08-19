@@ -7,6 +7,7 @@
 #include "Core/Logger/Log.hpp"
 #include "Core/Resource/ResourceManager.hpp"
 
+#include "glm/fwd.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/mesh.h"
@@ -17,9 +18,31 @@
 #include <tracy/Tracy.hpp>
 
 namespace Axle {
+    static glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
+        glm::mat4 to;
+        // the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+        to[0][0] = from.a1;
+        to[1][0] = from.a2;
+        to[2][0] = from.a3;
+        to[3][0] = from.a4;
+        to[0][1] = from.b1;
+        to[1][1] = from.b2;
+        to[2][1] = from.b3;
+        to[3][1] = from.b4;
+        to[0][2] = from.c1;
+        to[1][2] = from.c2;
+        to[2][2] = from.c3;
+        to[3][2] = from.c4;
+        to[0][3] = from.d1;
+        to[1][3] = from.d2;
+        to[2][3] = from.d3;
+        to[3][3] = from.d4;
+        return to;
+    }
+
     struct Model::InternalMethods {
-        static void ProcessNode(aiNode* node, const aiScene* scene, Model* model);
-        static Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, Model* model);
+        static void ProcessNode(aiNode* node, const aiScene* scene, Model* model, const glm::mat4& parentTransform);
+        static Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, Model* model, const glm::mat4& nodeTransform);
         static Ref<Texture2D>
         LoadMaterialTexture(aiMaterial* mat, aiTextureType aiType, TextureType type, const std::string& directory);
     };
@@ -46,7 +69,7 @@ namespace Axle {
                      scene->mNumMaterials,
                      scene->mRootNode->mNumChildren);
 
-        InternalMethods::ProcessNode(scene->mRootNode, scene, this);
+        InternalMethods::ProcessNode(scene->mRootNode, scene, this, glm::mat4(1.0f));
     }
 
     void Model::Draw(const glm::mat4& transform) {
@@ -57,22 +80,30 @@ namespace Axle {
         }
     }
 
-    void Model::InternalMethods::ProcessNode(aiNode* node, const aiScene* scene, Model* model) {
+    void Model::InternalMethods::ProcessNode(aiNode* node,
+                                             const aiScene* scene,
+                                             Model* model,
+                                             const glm::mat4& parentTransform) {
         ZoneScopedN("Process model node");
+
+        glm::mat4 nodeTransform = parentTransform * ConvertMatrixToGLMFormat(node->mTransformation);
 
         // Process node's meshes
         for (u32 i = 0; i < node->mNumMeshes; ++i) {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            model->m_Meshes.push_back(ProcessMesh(mesh, scene, model));
+            model->m_Meshes.push_back(ProcessMesh(mesh, scene, model, nodeTransform));
         }
 
         // Recursion
         for (u32 i = 0; i < node->mNumChildren; ++i) {
-            ProcessNode(node->mChildren[i], scene, model);
+            ProcessNode(node->mChildren[i], scene, model, nodeTransform);
         }
     }
 
-    Mesh Model::InternalMethods::ProcessMesh(aiMesh* mesh, const aiScene* scene, Model* model) {
+    Mesh Model::InternalMethods::ProcessMesh(aiMesh* mesh,
+                                             const aiScene* scene,
+                                             Model* model,
+                                             const glm::mat4& nodeTransform) {
         ZoneScopedN("Process mesh model");
 
         std::vector<Vertex> vertices;
@@ -97,7 +128,7 @@ namespace Axle {
             } else {
                 // No UVs / tangent generation failed for this mesh — flag it so normal mapping
                 // is skipped or falls back to a per-triangle tangent computed post-load.
-                vertex.tangent = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                vertex.tangent = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
                 AX_ASSERT(false, LogChannel::Renderer, "No tangent found in import");
             }
 
@@ -153,7 +184,7 @@ namespace Axle {
         if (AI_SUCCESS == aiGetMaterialFloat(material, AI_MATKEY_ROUGHNESS_FACTOR, &roughness))
             pod.RoughnessFactor = roughness;
 
-        return Mesh(vertices, indices, std::move(textures), pod);
+        return Mesh(vertices, indices, std::move(textures), pod, nodeTransform);
     }
 
     Ref<Texture2D> Model::InternalMethods::LoadMaterialTexture(aiMaterial* mat,
