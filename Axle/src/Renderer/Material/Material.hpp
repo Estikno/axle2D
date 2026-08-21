@@ -68,5 +68,6 @@ namespace Axle {
 
         Ref<Texture2D> m_WhiteFallback;
         Ref<Texture2D> m_NormalFallback;
+        Ref<Texture2D> m_MRFallback; // metallic-roughness fallback (G=1 roughness, B=0 metalness)
     };
 } // namespace Axle

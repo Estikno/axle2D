@@ -17,6 +17,7 @@ namespace Axle {
 
         m_WhiteFallback = Texture2D::Create1x1(255, 255, 255, 255);
         m_NormalFallback = Texture2D::Create1x1(128, 128, 255, 255);
+        m_MRFallback = Texture2D::Create1x1(255, 255, 0, 255); // roughness=1, metalness=0
     }
 
     Material::~Material() {
@@ -28,7 +29,8 @@ namespace Axle {
           m_UBO(std::move(other.m_UBO)),
           m_Textures(std::move(other.m_Textures)),
           m_WhiteFallback(std::move(other.m_WhiteFallback)),
-          m_NormalFallback(std::move(other.m_NormalFallback)) {}
+          m_NormalFallback(std::move(other.m_NormalFallback)),
+          m_MRFallback(std::move(other.m_MRFallback)) {}
 
     Material& Material::operator=(Material&& other) noexcept {
         if (this != &other) {
@@ -39,6 +41,7 @@ namespace Axle {
             m_Textures = std::move(other.m_Textures);
             m_WhiteFallback = std::move(other.m_WhiteFallback);
             m_NormalFallback = std::move(other.m_NormalFallback);
+            m_MRFallback = std::move(other.m_MRFallback);
         }
         return *this;
     }
@@ -50,6 +53,8 @@ namespace Axle {
                 m_Textures.at(i)->Bind(i);
             else if (static_cast<TextureType>(i) == TextureType::Normal)
                 m_NormalFallback->Bind(i);
+            else if (static_cast<TextureType>(i) == TextureType::MetallicRoughness)
+                m_MRFallback->Bind(i);
             else
                 m_WhiteFallback->Bind(i);
         }
@@ -66,5 +71,8 @@ namespace Axle {
         m_Shader.Reset();
         m_UBO.Reset();
         std::fill(std::begin(m_Textures), std::end(m_Textures), nullptr);
+        m_WhiteFallback.Reset();
+        m_NormalFallback.Reset();
+        m_MRFallback.Reset();
     }
 } // namespace Axle

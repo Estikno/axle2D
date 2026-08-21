@@ -122,7 +122,7 @@ namespace Axle {
                 cw::InvalidThreadIndex,
                 LAYERS_TAG);
 
-        AX_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
+        CW_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
 
         f64 previous = glfwGetTime();
         f64 lag = 0.0;
@@ -153,7 +153,7 @@ namespace Axle {
                         cw::InvalidThreadIndex,
                         LAYERS_TAG);
 
-                AX_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
+                CW_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
                 // --------------------------
                 lag -= app->m_DeltaTime;
                 FrameMarkNamed("Update Tick");
@@ -171,7 +171,7 @@ namespace Axle {
                     cw::InvalidThreadIndex,
                     LAYERS_TAG);
 
-            AX_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
+            CW_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
 
             // Sleep until the next tick is due, minus a small margin
             f64 timeUntilNextTick = app->m_DeltaTime - lag;
@@ -191,7 +191,7 @@ namespace Axle {
                 cw::InvalidThreadIndex,
                 LAYERS_TAG);
 
-        AX_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
+        CW_SCHEDULE_TAG_AND_WAIT(LAYERS_TAG);
 
         source.request_stop();
         co_return;
@@ -228,7 +228,7 @@ namespace Axle {
                 EventHandler::ProcessEvents(app->m_LayerStack->rbegin(), app->m_LayerStack->rend());
             }
 
-            AX_SCHEDULE_TAG_AND_WAIT(EVENT_INPUT_TAG);
+            CW_SCHEDULE_TAG_AND_WAIT(EVENT_INPUT_TAG);
 
             if (!app->m_Minimized.load(std::memory_order_acquire)) {
                 ImGuiInitFrame();

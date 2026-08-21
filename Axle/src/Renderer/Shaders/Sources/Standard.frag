@@ -31,8 +31,6 @@ in VS_OUT {
     mat3 TBN;
 } fs_in;
 
-uniform mat3 u_NormalMatrix; // transpose(inverse(mat3(uModel))), computed CPU-side
-
 // Temporal light data
 uniform vec3  u_LightPos;
 uniform vec3  u_LightColor;
